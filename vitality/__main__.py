@@ -24,6 +24,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate presentation slides.")
     parser.add_argument("config", type=str, help="slide configuration file")
     parser.add_argument("-o", "--output", type=str, required=True, help="output file")
+    parser.add_argument("-r", "--remote-d3", action="store_true", default=False, help="load d3.js remotely")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     args = parser.parse_args()
@@ -44,7 +45,10 @@ def main():
 
     # Render template and generate presentation
     template = env.get_template("presentation.html")
-    presentation = template.render(data=data)
+    presentation = template.render(
+        data=data,
+        remote_d3=args.remote_d3
+    )
     with open(args.output, "w") as f:
         f.write(presentation)
     termcolor.cprint(f"Presentation generated at {args.output}", color="green")
