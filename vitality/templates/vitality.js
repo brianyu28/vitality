@@ -72,8 +72,6 @@ function hideCursor() {
 
 function renderSlide(slideIdx) {
 
-    console.log("rendering slide " + slideIdx);
-
     // Update slide index
     state.slideIdx = slideIdx;
 
@@ -89,20 +87,53 @@ function renderSlide(slideIdx) {
     state.svg.style("background-color", slide.backgroundColor);
     switch (slide.layout) {
         case "section":
-            renderSection(slide);
+            renderSectionSlide(slide);
+        case "title":
+            renderTitleSlide(slide);
     }
 }
 
-function renderSection(slide) {
-    const elt = state.svg.append("text")
-                         .attr("x", "50%")
-                         .attr("y", "50%")
-                         .attr("dominant-baseline", "middle")
-                         .attr("text-anchor", "middle")
-                         .attr("font-size", slide.size)
-                         .attr("font-family", slide.font)
-                         .style("fill", slide.color)
-                         .text(slide.content);
-    state.objects.push(elt);
+function renderSectionSlide(slide) {
+    const section =
+        state.svg.append("text")
+             .attr("x", "50%")
+             .attr("y", "50%")
+             .attr("dominant-baseline", "middle")
+             .attr("text-anchor", "middle")
+             .attr("font-size", slide.size)
+             .attr("font-family", slide.font)
+             .style("fill", slide.color)
+             .text(slide.content);
+    state.objects.push(section);
 }
 
+function renderTitleSlide(slide) {
+    const title =
+        state.svg.append("text")
+             .attr("x", "50%")
+             .attr("y", "45%")
+             .attr("dominant-baseline", "middle")
+             .attr("text-anchor", "middle")
+             .attr("font-size", slide.title.size)
+             .attr("font-family", slide.title.font)
+             .style("fill", slide.title.color)
+             .text(slide.title.content);
+    state.objects.push(title);
+
+    const subtitle =
+        state.svg.append("text")
+             .attr("x", "50%")
+             .attr("y", "60%")
+             .attr("dominant-baseline", "middle")
+             .attr("text-anchor", "middle")
+             .attr("font-size", slide.subtitle.size)
+             .attr("font-family", slide.subtitle.font)
+             .style("fill", slide.subtitle.color);
+    for (let i = 0; i < slide.subtitle.content.length; i++) {
+        subtitle.append("tspan")
+                .attr("x", "50%")
+                .attr("dy", slide.subtitle.size + 5)
+                .text(slide.subtitle.content[i]);
+    }
+    state.objects.push(subtitle);
+}

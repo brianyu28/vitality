@@ -3,12 +3,20 @@ from types import SimpleNamespace
 from . import Error
 
 DEFAULTS = SimpleNamespace(
+
+    # Dimensions
+    height=1080,
+    width=1920,
+
+    # Layout
     background_color="black",
     font="sans-serif",
-    height=1080,
-    section_font_size=120,
     text_color="white",
-    width=1920
+
+    # Font Sizes
+    section_font_size=100,
+    subtitle_font_size=60,
+    title_font_size=120
 )
 
 def presentation_data(config):
@@ -37,6 +45,9 @@ def presentation_data(config):
         elif slide["type"] == "section":
             slide = section_slide(slide, data)
 
+        elif slide["type"] == "title":
+            slide = title_slide(slide, data)
+
         elif slide.get("objects") is None:
             continue
 
@@ -48,12 +59,64 @@ def presentation_data(config):
     return data
 
 
-def section_slide(slide, data):
+def base_slide(slide, data):
+    """Basic elements on every slide."""
     return {
-        "layout": "section",
         "backgroundColor": slide.get("background_color", data["defaults"]["background_color"]),
+    }
+
+def section_slide(slide, data):
+    """Section divider slide, just a single heading."""
+    result = base_slide(slide, data)
+    result.update({
+        "layout": "section",
         "color": slide.get("color", data["defaults"]["color"]),
         "content": slide.get("text", ""),
         "font": slide.get("font", data["defaults"]["font"]),
         "size": slide.get("size", DEFAULTS.section_font_size)
-    }
+    })
+    return result
+
+
+def title_slide(slide, data):
+    """Title slide, with title and multi-line subtitle."""
+    result = base_slide(slide, data)
+
+    # Allow string literals as title and subtitle
+    if isinstance(slide["title"], str):
+        slide["title"] = {
+            "text": slide["title"]
+        }
+    if isinstance(slide["subtitle"], str):
+        slide["subtitle"] = {
+            "text": [slide["subtitle"]]
+        }
+    elif isinstance(slide["subtitle"], list):
+        slide["subtitle"] = {
+            "text": slide["subtitle"]
+        }
+    if not isinstance(slide["subtitle"].get("text", []), list):
+        slide["subtitle"]["text"] = [slide["subtitle"]["text"]]
+
+    # Allow specifying color and font for entire slide
+    for prop in ["color", "font"]:
+        if slide.get(prop):
+            slide["title"][prop] = slide["title"].get(prop, slide[prop])
+            slide["subtitle"][prop] = slide["subtitle"].get(prop, slide[prop])
+
+    result.update({
+        "layout": "title",
+        "title": {
+            "color": slide["title"].get("color", data["defaults"]["color"]),
+            "content": slide["title"].get("text", ""),
+            "font": slide["title"].get("font", data["defaults"]["font"]),
+            "size": slide["title"].get("size", DEFAULTS.title_font_size)
+        },
+        "subtitle": {
+            "color": slide["subtitle"].get("color", data["defaults"]["color"]),
+            "content": slide["subtitle"].get("text", []),
+            "font": slide["subtitle"].get("font", data["defaults"]["font"]),
+            "size": slide["title"].get("size", DEFAULTS.subtitle_font_size)
+        }
+    })
+    return result
