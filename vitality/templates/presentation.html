@@ -5,6 +5,9 @@
         <title>
             {{ data.title | default("Presentation", true) }}
         </title>
+        {% for font in data.fonts %}
+            <link href="https://fonts.googleapis.com/css?family={{ font }}&display=swap" rel="stylesheet">
+        {% endfor %}
         {% if remote_d3 %}
             <script src="https://d3js.org/d3.v5.min.js"></script>
         {% else %}

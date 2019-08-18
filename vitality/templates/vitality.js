@@ -1,6 +1,8 @@
 const state = {
     aspectRatio: null,
-    objects: {},
+    objects: [],
+    references: {},
+    slideIdx: null,
     svg: null
 };
 
@@ -29,16 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("margin-bottom", padding)
                   .style("background-color", "black");
 
-    drawHeadline("Testing");
-
-    /*
-    state.svg.append("circle")
-             .attr("cx", 300)
-             .attr("cy", 300)
-             .attr("r", 50)
-             .style("fill", "blue");
-    console.log(state.svg);
-    */
+    renderSlide(0);
 });
 
 // Window resizes, resize SVG to fit
@@ -54,25 +47,47 @@ window.addEventListener("keydown", (e) => {
     switch (e.keyCode) {
         case KEYS.rightArrow:
         case KEYS.space:
-            console.log("moving forwards...");
             e.preventDefault();
+            renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1));
             break;
         case KEYS.leftArrow:
-            console.log("move backwards...");
             e.preventDefault();
+            renderSlide(Math.max(state.slideIdx - 1, 0));
         default:
             break;
     }
 });
 
-function drawHeadline(text) {
+function renderSlide(slideIdx) {
+
+    console.log("rendering slide " + slideIdx);
+
+    // Update slide index
+    state.slideIdx = slideIdx;
+
+    // Remove previous content
+    for (let i = 0; i < state.objects.length; i++) {
+        state.objects[i].remove();
+    }
+
+    // Update with current slide
+    const slide = data.slides[slideIdx];
+    switch (slide.layout) {
+        case "title":
+            renderTitle(slide);
+    }
+}
+
+function renderTitle(slide) {
     const elt = state.svg.append("text")
                          .attr("x", "50%")
                          .attr("y", "50%")
                          .attr("dominant-baseline", "middle")
                          .attr("text-anchor", "middle")
-                         .attr("font-size", 120)
+                         .attr("font-size", slide.size)
+                         .attr("font-family", slide.font)
                          .style("fill", "white")
-                         .text(text);
+                         .text(slide.content);
+    state.objects.push(elt);
 }
 
