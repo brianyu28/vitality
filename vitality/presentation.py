@@ -8,15 +8,26 @@ DEFAULTS = SimpleNamespace(
     height=1080,
     width=1920,
 
+    # Spacing
+    bullets_padding_left=100,
+    heading_padding_left=50,
+    heading_padding_top=50,
+
     # Layout
     background_color="black",
     font="sans-serif",
     text_color="white",
 
     # Font Sizes
+    heading_font_size=80,
     section_font_size=100,
     subtitle_font_size=60,
-    title_font_size=120
+    text_font_size=55,
+    title_font_size=120,
+
+    # Bullets
+    bullet=chr(8226)+" ",
+    bullet_spacing=30
 )
 
 def presentation_data(config):
@@ -56,6 +67,9 @@ def presentation_data(config):
         elif slide["type"] == "blank":
             result = blank_slide(slide, data)
 
+        elif slide["type"] == "bullets":
+            result = bullets_slide(slide, data)
+
         else:
             result = blank_slide(slide, data)
 
@@ -79,6 +93,56 @@ def blank_slide(slide, data):
     result = base_slide(slide, data)
     result.update({
         "layout": "blank"
+    })
+    return result
+
+
+def bullets_slide(slide, data):
+    """Slide with title and bullets."""
+    result = base_slide(slide, data)
+
+    # Handle empty title, or title as single string
+    if "title" not in slide:
+        slide["title"] = {}
+    elif isinstance(slide["title"], str):
+        slide["title"] = {"text": slide["title"]}
+
+    if isinstance(slide["bullets"], str):
+        slide["bullets"] = {
+            "text": [slide["bullets"]]
+        }
+    elif isinstance(slide["bullets"], list):
+        slide["bullets"] = {
+            "text": slide["bullets"]
+        }
+    if not isinstance(slide["bullets"].get("text", []), list):
+        slide["bullets"]["text"] = [slide["bullets"]["text"]]
+
+    # Allow specifying color and font for entire slide
+    for prop in ["color", "font", "padding_left"]:
+        if slide.get(prop):
+            slide["title"][prop] = slide["title"].get(prop, slide[prop])
+            slide["bullets"][prop] = slide["bullets"].get(prop, slide[prop])
+
+    result.update({
+        "layout": "bullets",
+        "title": {
+            "color": slide["title"].get("color", data["defaults"]["color"]),
+            "content": slide["title"].get("text", ""),
+            "font": slide["title"].get("font", data["defaults"]["font"]),
+            "padding_left": slide["title"].get("padding_left", DEFAULTS.heading_padding_left),
+            "padding_top": slide["title"].get("padding_top", DEFAULTS.heading_padding_top),
+            "size": slide["title"].get("size", DEFAULTS.heading_font_size)
+        },
+        "bullets": {
+            "bullet": slide["bullets"].get("bullet", DEFAULTS.bullet),
+            "color": slide["bullets"].get("color", data["defaults"]["color"]),
+            "content": slide["bullets"].get("text", []),
+            "font": slide["bullets"].get("font", data["defaults"]["font"]),
+            "padding_left": slide["title"].get("padding_left", DEFAULTS.bullets_padding_left),
+            "size": slide["bullets"].get("size", DEFAULTS.text_font_size),
+            "spacing": slide["bullets"].get("spacing", DEFAULTS.bullet_spacing)
+        }
     })
     return result
 
@@ -133,7 +197,9 @@ def title_slide(slide, data):
             "color": slide["subtitle"].get("color", data["defaults"]["color"]),
             "content": slide["subtitle"].get("text", []),
             "font": slide["subtitle"].get("font", data["defaults"]["font"]),
-            "size": slide["title"].get("size", DEFAULTS.subtitle_font_size)
+            "size": slide["subtitle"].get("size", DEFAULTS.subtitle_font_size)
         }
     })
     return result
+
+
