@@ -11,7 +11,7 @@ DEFAULTS = SimpleNamespace(
     # Spacing
     bullets_padding_left=100,
     heading_padding_left=50,
-    heading_padding_top=50,
+    heading_padding_top=80,
 
     # Layout
     background_color="black",
