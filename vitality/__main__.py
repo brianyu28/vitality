@@ -1,4 +1,6 @@
+import os
 import sys
+import time
 import traceback
 
 import argparse
@@ -6,15 +8,20 @@ import jinja2
 import termcolor
 import yaml
 
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
 from . import __version__, Error
 from .presentation import presentation_data
 
 env = jinja2.Environment(
     loader=jinja2.PackageLoader("vitality", "templates")
 )
+args = None
 
 
 def main():
+    global args
 
     # Parse arguments
     parser = argparse.ArgumentParser(description="Generate presentation slides.")
@@ -23,15 +30,28 @@ def main():
     parser.add_argument("-r", "--remote-d3", action="store_true", default=False, help="load d3.js remotely")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
     parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument("-w", "--watch", action="store_true", help="watch file for changes")
     args = parser.parse_args()
 
     if args.verbose:
         excepthook.verbose = True
     sys.excepthook = excepthook
 
+    if args.watch:
+        watch()
+        return
+
+    compile_presentation(
+        filename=args.config,
+        outfile=args.output,
+        remote_d3=args.remote_d3
+    )
+
+def compile_presentation(filename, outfile, remote_d3=False):
+
     # Read slide configuration file
     try:
-        with open(args.config) as f:
+        with open(filename) as f:
             config = yaml.load(f.read())
     except FileNotFoundError:
         raise Error("Configuration file does not exist.")
@@ -43,12 +63,38 @@ def main():
     template = env.get_template("presentation.html")
     presentation = template.render(
         data=data,
-        remote_d3=args.remote_d3,
+        remote_d3=remote_d3,
         version=__version__
     )
-    with open(args.output, "w") as f:
+    with open(outfile, "w") as f:
         f.write(presentation)
-    termcolor.cprint(f"Presentation generated at {args.output}", color="green")
+    termcolor.cprint(f"Presentation generated at {outfile}", color="green")
+
+
+class FileChangeHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        global args
+        if self.dirname == event.src_path:
+            print("Re-generating presentation...")
+            try:
+                compile_presentation(args.config, args.output, remote_d3=args.remote_d3)
+            except yaml.parser.ParserError:
+                termcolor.cprint("Syntax error when compiling presentation.", color="red")
+
+
+def watch():
+    print("Watching...")
+    event_handler = FileChangeHandler()
+    event_handler.dirname = os.path.dirname(args.config)
+    observer = Observer()
+    observer.schedule(event_handler, event_handler.dirname)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
 
 def excepthook(type, value, tb):

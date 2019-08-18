@@ -8,7 +8,11 @@ setup(
         "console_scripts": ["vitality=vitality.__main__:main"]
     },
     install_requires=[
-        "argparse>=1.4", "jinja2>=2.10", "pyyaml>=3.13", "termcolor>=1.1"
+        "argparse>=1.4",
+        "jinja2>=2.10",
+        "pyyaml>=3.13",
+        "termcolor>=1.1",
+        "watchdog>=0.9"
     ],
     name="vitality",
     packages=["vitality"],
