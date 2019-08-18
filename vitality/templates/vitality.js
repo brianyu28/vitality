@@ -55,6 +55,9 @@ window.addEventListener("keydown", (e) => {
         case KEYS.leftArrow:
             e.preventDefault();
             renderSlide(Math.max(state.slideIdx - 1, 0));
+        case KEYS.z:
+            e.preventDefault();
+            renderSlide(0);
         default:
             break;
     }
