@@ -139,7 +139,7 @@ function renderBulletsSlide(slide) {
         bullets.append("tspan")
                .attr("x", slide.bullets.padding_left)
                .attr("dy", slide.bullets.size + slide.bullets.spacing)
-               .text(slide.bullets.bullet + slide.bullets.content[i]);
+               .text(slide.bullets.bullet + (slide.bullets.content[i] || " "));
     }
     state.objects.push(bullets);
 }

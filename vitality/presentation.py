@@ -15,8 +15,8 @@ DEFAULTS = SimpleNamespace(
 
     # Layout
     background_color="black",
+    color="white",
     font="sans-serif",
-    text_color="white",
 
     # Font Sizes
     heading_font_size=80,
@@ -36,9 +36,27 @@ def presentation_data(config):
     data = {
         "title": config.get("title"),
         "defaults": {
+
+            # Spacing
+            "bullets_padding_left": defaults.get("bullets_padding_left", DEFAULTS.bullets_padding_left),
+            "heading_padding_left": defaults.get("heading_padding_left", DEFAULTS.heading_padding_left),
+            "heading_padding_top": defaults.get("heading_padding_top", DEFAULTS.heading_padding_top),
+
+            # Layout
             "background_color": defaults.get("background_color", DEFAULTS.background_color),
-            "color": defaults.get("color", DEFAULTS.text_color),
-            "font": defaults.get("font", DEFAULTS.font)
+            "color": defaults.get("color", DEFAULTS.color),
+            "font": defaults.get("font", DEFAULTS.font),
+
+            # Font Sizes
+            "heading_font_size": defaults.get("heading_font_size", DEFAULTS.heading_font_size),
+            "section_font_size": defaults.get("section_font_size", DEFAULTS.section_font_size),
+            "subtitle_font_size": defaults.get("subtitle_font_size", DEFAULTS.subtitle_font_size),
+            "text_font_size": defaults.get("text_font_size", DEFAULTS.text_font_size),
+            "title_font_size": defaults.get("title_font_size", DEFAULTS.title_font_size),
+
+            # Bullets
+            "bullet": defaults.get("bullet", DEFAULTS.bullet),
+            "bullet_spacing": defaults.get("bullet_spacing", DEFAULTS.bullet_spacing)
         },
         "fonts": config.get("fonts", []),
         "size": {
@@ -107,6 +125,8 @@ def bullets_slide(slide, data):
     elif isinstance(slide["title"], str):
         slide["title"] = {"text": slide["title"]}
 
+    if "bullets" not in slide:
+        slide["bullets"] = []
     if isinstance(slide["bullets"], str):
         slide["bullets"] = {
             "text": [slide["bullets"]]
@@ -130,18 +150,18 @@ def bullets_slide(slide, data):
             "color": slide["title"].get("color", data["defaults"]["color"]),
             "content": slide["title"].get("text", ""),
             "font": slide["title"].get("font", data["defaults"]["font"]),
-            "padding_left": slide["title"].get("padding_left", DEFAULTS.heading_padding_left),
-            "padding_top": slide["title"].get("padding_top", DEFAULTS.heading_padding_top),
-            "size": slide["title"].get("size", DEFAULTS.heading_font_size)
+            "padding_left": slide["title"].get("padding_left", data["defaults"]["heading_padding_left"]),
+            "padding_top": slide["title"].get("padding_top", data["defaults"]["heading_padding_top"]),
+            "size": slide["title"].get("size", data["defaults"]["heading_font_size"])
         },
         "bullets": {
-            "bullet": slide["bullets"].get("bullet", DEFAULTS.bullet),
+            "bullet": slide["bullets"].get("bullet", data["defaults"]["bullet"]),
             "color": slide["bullets"].get("color", data["defaults"]["color"]),
             "content": slide["bullets"].get("text", []),
             "font": slide["bullets"].get("font", data["defaults"]["font"]),
-            "padding_left": slide["title"].get("padding_left", DEFAULTS.bullets_padding_left),
-            "size": slide["bullets"].get("size", DEFAULTS.text_font_size),
-            "spacing": slide["bullets"].get("spacing", DEFAULTS.bullet_spacing)
+            "padding_left": slide["title"].get("padding_left", data["defaults"]["bullets_padding_left"]),
+            "size": slide["bullets"].get("size", data["defaults"]["text_font_size"]),
+            "spacing": slide["bullets"].get("spacing", data["defaults"]["bullet_spacing"])
         }
     })
     return result
@@ -154,7 +174,7 @@ def section_slide(slide, data):
         "color": slide.get("color", data["defaults"]["color"]),
         "content": slide.get("text", ""),
         "font": slide.get("font", data["defaults"]["font"]),
-        "size": slide.get("size", DEFAULTS.section_font_size)
+        "size": slide.get("size", data["defaults"]["section_font_size"])
     })
     return result
 
@@ -191,13 +211,13 @@ def title_slide(slide, data):
             "color": slide["title"].get("color", data["defaults"]["color"]),
             "content": slide["title"].get("text", ""),
             "font": slide["title"].get("font", data["defaults"]["font"]),
-            "size": slide["title"].get("size", DEFAULTS.title_font_size)
+            "size": slide["title"].get("size", data["defaults"]["title_font_size"])
         },
         "subtitle": {
             "color": slide["subtitle"].get("color", data["defaults"]["color"]),
             "content": slide["subtitle"].get("text", []),
             "font": slide["subtitle"].get("font", data["defaults"]["font"]),
-            "size": slide["subtitle"].get("size", DEFAULTS.subtitle_font_size)
+            "size": slide["subtitle"].get("size", data["defaults"]["subtitle_font_size"])
         }
     })
     return result
