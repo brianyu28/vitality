@@ -6,16 +6,12 @@ import jinja2
 import termcolor
 import yaml
 
-from . import __version__
+from . import __version__, Error
 from .presentation import presentation_data
 
 env = jinja2.Environment(
     loader=jinja2.PackageLoader("vitality", "templates")
 )
-
-
-class Error(Exception):
-    pass
 
 
 def main():
@@ -47,7 +43,8 @@ def main():
     template = env.get_template("presentation.html")
     presentation = template.render(
         data=data,
-        remote_d3=args.remote_d3
+        remote_d3=args.remote_d3,
+        version=__version__
     )
     with open(args.output, "w") as f:
         f.write(presentation)

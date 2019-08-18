@@ -13,3 +13,9 @@ except DistributionNotFound:
     __version__ = "locally installed"
 else:
     __version__ = _dist.version
+
+
+class Error(Exception):
+    pass
+
+
