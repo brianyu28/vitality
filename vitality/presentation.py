@@ -13,11 +13,13 @@ DEFAULTS = SimpleNamespace(
 
 def presentation_data(config):
     """Converts YML presentation representation into instructions object."""
+    defaults = config.get("defaults", {})
     data = {
         "title": config.get("title"),
         "defaults": {
-            "color": config.get("defaults", {}).get("color", DEFAULTS.text_color),
-            "font": config.get("defaults", {}).get("font", DEFAULTS.font)
+            "background_color": defaults.get("background_color", DEFAULTS.background_color),
+            "color": defaults.get("color", DEFAULTS.text_color),
+            "font": defaults.get("font", DEFAULTS.font)
         },
         "fonts": config.get("fonts", []),
         "size": {
@@ -49,8 +51,9 @@ def presentation_data(config):
 def section_slide(slide, data):
     return {
         "layout": "section",
+        "backgroundColor": slide.get("background_color", data["defaults"]["background_color"]),
+        "color": slide.get("color", data["defaults"]["color"]),
         "content": slide.get("text", ""),
         "font": slide.get("font", data["defaults"]["font"]),
-        "size": slide.get("size", DEFAULTS.section_font_size),
-        "color": slide.get("color", data["defaults"]["color"])
+        "size": slide.get("size", DEFAULTS.section_font_size)
     }

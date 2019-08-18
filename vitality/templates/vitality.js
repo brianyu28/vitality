@@ -78,12 +78,15 @@ function renderSlide(slideIdx) {
     state.slideIdx = slideIdx;
 
     // Remove previous content
+    // TODO: if transitions are on, transition objects instead
     for (let i = 0; i < state.objects.length; i++) {
         state.objects[i].remove();
     }
 
+
     // Update with current slide
     const slide = data.slides[slideIdx];
+    state.svg.style("background-color", slide.backgroundColor);
     switch (slide.layout) {
         case "section":
             renderSection(slide);

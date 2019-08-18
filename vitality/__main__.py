@@ -37,15 +37,14 @@ def main():
         excepthook.verbose = True
     sys.excepthook = excepthook
 
-    if args.watch:
-        watch()
-        return
-
     compile_presentation(
         filename=args.config,
         outfile=args.output,
         remote_d3=args.remote_d3
     )
+
+    if args.watch:
+        watch()
 
 def compile_presentation(filename, outfile, remote_d3=False):
 
