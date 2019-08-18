@@ -38,24 +38,32 @@ def presentation_data(config):
     }
     for slide in config.get("slides", []):
 
-        # just string, section slide
-        if isinstance(slide, str):
-            slide = section_slide({"text": slide}, data)
+        if slide is None:
+            slide = {}
+            result = blank_slide(slide, data)
+
+        # Just string is a section slide
+        elif isinstance(slide, str):
+            slide = {"text": slide}
+            result = section_slide(slide, data)
 
         elif slide["type"] == "section":
-            slide = section_slide(slide, data)
+            result = section_slide(slide, data)
 
         elif slide["type"] == "title":
-            slide = title_slide(slide, data)
+            result = title_slide(slide, data)
 
-        elif slide.get("objects") is None:
-            continue
+        elif slide["type"] == "blank":
+            result = blank_slide(slide, data)
+
+        else:
+            result = blank_slide(slide, data)
 
         # TODO: deal with custom objects here
         if slide.get("objects") is not None:
             pass
 
-        data["slides"].append(slide)
+        data["slides"].append(result)
     return data
 
 
@@ -64,6 +72,15 @@ def base_slide(slide, data):
     return {
         "backgroundColor": slide.get("background_color", data["defaults"]["background_color"]),
     }
+
+
+def blank_slide(slide, data):
+    """Empty slide with no content."""
+    result = base_slide(slide, data)
+    result.update({
+        "layout": "blank"
+    })
+    return result
 
 def section_slide(slide, data):
     """Section divider slide, just a single heading."""
