@@ -56,7 +56,7 @@ window.addEventListener("keydown", (e) => {
         case KEYS.rightArrow:
         case KEYS.space:
             e.preventDefault();
-            renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1));
+            renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1), transition=true);
             break;
         case KEYS.leftArrow:
             e.preventDefault();
@@ -81,20 +81,41 @@ function hideCursor() {
     document.body.style.cursor = "none";
 }
 
-function renderSlide(slideIdx) {
+function renderSlide(slideIdx, transition=false) {
 
     // Update slide index
     state.slideIdx = slideIdx;
+    const slide = data.slides[slideIdx];
 
-    // Remove previous content
-    // TODO: if transitions are on, transition objects instead
-    for (let i = 0; i < state.objects.length; i++) {
-        state.objects[i].remove();
+    // If no transition, then don't need previous references
+    if (transition === false) {
+        state.references = {};
     }
 
+    // Get references in new slide
+    const references =
+        new Set(slide.objects
+                     .filter(obj => obj.id !== undefined)
+                     .map(obj => obj.id));
+
+    // Get objects that need to make a transition
+    const transitioners =
+        Object.keys(state.references)
+        .filter(id => references.has(id))
+        .reduce((obj, key) => {
+            obj[key] = state.references[key];
+            return obj;
+        }, {});
+
+    // Remove previous content
+    for (let i = 0; i < state.objects.length; i++) {
+        if (transition === false ||
+            Object.values(transitioners).some((k) => k.object == state.objects[i]) === false) {
+            state.objects[i].remove();
+        }
+    }
 
     // Update with current slide
-    const slide = data.slides[slideIdx];
     state.svg.style("background-color", slide.backgroundColor);
     switch (slide.layout) {
         case "bullets":
@@ -107,6 +128,9 @@ function renderSlide(slideIdx) {
             renderTitleSlide(slide);
             break;
     }
+
+    // Add objects
+    renderObjects(slide, transitioners);
 }
 
 function renderBulletsSlide(slide) {
@@ -187,4 +211,48 @@ function renderTitleSlide(slide) {
                 .text(slide.subtitle.content[i]);
     }
     state.objects.push(subtitle);
+}
+
+function transitionCall(transition, attrs, style) {
+    for (let key in attrs)
+        transition.attr(key, attrs[key]);
+    for (let key in style)
+        transition.style(key, style[key]);
+}
+
+function renderObjects(slide, transitioners) {
+    state.references = {};
+    for (let i = 0; i < slide.objects.length; i++) {
+        const object = slide.objects[i];
+
+        if (object.id !== undefined && transitioners[object.id] !== undefined) {
+
+            // Transition object from previous slide
+            const obj = transitioners[object.id].object;
+            const transition =
+                d3.transition()
+                  .duration(transitioners[object.id].transition_length)
+                  .ease(d3.easeLinear);
+            obj.transition(transition).call(transitionCall, object.attrs, object.style);
+        } else {
+
+            // Create new object
+            const obj = state.svg.append(object.type);
+            for (let key in object.attrs) {
+                obj.attr(key, object.attrs[key]);
+            }
+            for (let key in object.style) {
+                obj.style(key, object.style[key]);
+            }
+
+            // Record reference to object if identified
+            if (object.id !== undefined) {
+                state.references[object.id] = {
+                    object: obj,
+                    transition_length: object.transition_length
+                };
+            }
+            state.objects.push(obj);
+        }
+    }
 }

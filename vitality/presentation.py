@@ -18,6 +18,9 @@ DEFAULTS = SimpleNamespace(
     color="white",
     font="sans-serif",
 
+    # Transitions
+    transition_length=500,
+
     # Font Sizes
     heading_font_size=80,
     section_font_size=100,
@@ -46,6 +49,9 @@ def presentation_data(config):
             "background_color": defaults.get("background_color", DEFAULTS.background_color),
             "color": defaults.get("color", DEFAULTS.color),
             "font": defaults.get("font", DEFAULTS.font),
+
+            # Transitions
+            "transition_length": defaults.get("transition_length", DEFAULTS.transition_length),
 
             # Font Sizes
             "heading_font_size": defaults.get("heading_font_size", DEFAULTS.heading_font_size),
@@ -76,14 +82,14 @@ def presentation_data(config):
             slide = {"text": slide}
             result = section_slide(slide, data)
 
+        elif slide.get("type", "blank") == "blank":
+            result = blank_slide(slide, data)
+
         elif slide["type"] == "section":
             result = section_slide(slide, data)
 
         elif slide["type"] == "title":
             result = title_slide(slide, data)
-
-        elif slide["type"] == "blank":
-            result = blank_slide(slide, data)
 
         elif slide["type"] == "bullets":
             result = bullets_slide(slide, data)
@@ -91,9 +97,8 @@ def presentation_data(config):
         else:
             result = blank_slide(slide, data)
 
-        # TODO: deal with custom objects here
         if slide.get("objects") is not None:
-            pass
+            add_objects(result, slide.get("objects"), data)
 
         data["slides"].append(result)
     return data
@@ -103,6 +108,7 @@ def base_slide(slide, data):
     """Basic elements on every slide."""
     return {
         "backgroundColor": slide.get("background_color", data["defaults"]["background_color"]),
+        "objects": []
     }
 
 
@@ -184,6 +190,10 @@ def title_slide(slide, data):
     result = base_slide(slide, data)
 
     # Allow string literals as title and subtitle
+    if "title" not in slide:
+        slide["title"] = ""
+    if "subtitle" not in slide:
+        slide["subtitle"] = ""
     if isinstance(slide["title"], str):
         slide["title"] = {
             "text": slide["title"]
@@ -223,3 +233,8 @@ def title_slide(slide, data):
     return result
 
 
+def add_objects(result, objects, data):
+    for obj in objects:
+        if "transition_length" not in obj:
+            obj["transition_length"] = data["defaults"]["transition_length"]
+        result["objects"].append(obj)

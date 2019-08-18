@@ -77,8 +77,8 @@ class FileChangeHandler(FileSystemEventHandler):
             print("Re-generating presentation...")
             try:
                 compile_presentation(args.config, args.output, remote_d3=args.remote_d3)
-            except yaml.parser.ParserError:
-                termcolor.cprint("Syntax error when compiling presentation.", color="red")
+            except Exception:
+                termcolor.cprint("Error when compiling presentation.", color="red")
 
 
 def watch():
