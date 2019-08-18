@@ -4,10 +4,11 @@ from . import Error
 
 DEFAULTS = SimpleNamespace(
     background_color="black",
-    title_font_size=120,
-    width=1920,
+    font="sans-serif",
     height=1080,
-    font="sans-serif"
+    section_font_size=120,
+    text_color="white",
+    width=1920
 )
 
 def presentation_data(config):
@@ -15,6 +16,7 @@ def presentation_data(config):
     data = {
         "title": config.get("title"),
         "defaults": {
+            "color": config.get("defaults", {}).get("color", DEFAULTS.text_color),
             "font": config.get("defaults", {}).get("font", DEFAULTS.font)
         },
         "fonts": config.get("fonts", []),
@@ -26,17 +28,29 @@ def presentation_data(config):
     }
     for slide in config.get("slides", []):
 
-        # title slide
+        # just string, section slide
         if isinstance(slide, str):
-            slide = title_slide(slide, data)
-            data["slides"].append(slide)
+            slide = section_slide({"text": slide}, data)
+
+        elif slide["type"] == "section":
+            slide = section_slide(slide, data)
+
+        elif slide.get("objects") is None:
+            continue
+
+        # TODO: deal with custom objects here
+        if slide.get("objects") is not None:
+            pass
+
+        data["slides"].append(slide)
     return data
 
 
-def title_slide(slide, data):
+def section_slide(slide, data):
     return {
-        "layout": "title",
-        "content": slide,
-        "font": data["defaults"]["font"],
-        "size": DEFAULTS.title_font_size
+        "layout": "section",
+        "content": slide.get("text", ""),
+        "font": slide.get("font", data["defaults"]["font"]),
+        "size": slide.get("size", DEFAULTS.section_font_size),
+        "color": slide.get("color", data["defaults"]["color"])
     }

@@ -85,12 +85,12 @@ function renderSlide(slideIdx) {
     // Update with current slide
     const slide = data.slides[slideIdx];
     switch (slide.layout) {
-        case "title":
-            renderTitle(slide);
+        case "section":
+            renderSection(slide);
     }
 }
 
-function renderTitle(slide) {
+function renderSection(slide) {
     const elt = state.svg.append("text")
                          .attr("x", "50%")
                          .attr("y", "50%")
@@ -98,7 +98,7 @@ function renderTitle(slide) {
                          .attr("text-anchor", "middle")
                          .attr("font-size", slide.size)
                          .attr("font-family", slide.font)
-                         .style("fill", "white")
+                         .style("fill", slide.color)
                          .text(slide.content);
     state.objects.push(elt);
 }
