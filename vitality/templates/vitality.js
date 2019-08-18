@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("background-color", "black");
 
     renderSlide(0);
-    state.cursorTimeout = setTimeout(hideCursor, 2000);
+    state.cursorTimeout = setTimeout(hideCursor, 1000);
 });
 
 // Window resizes, resize SVG to fit
@@ -63,7 +63,7 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("mousemove", () => {
     clearTimeout(state.cursorTimeout);
     document.body.style.cursor = "";
-    state.cursorTimeout = setTimeout(hideCursor, 2000);
+    state.cursorTimeout = setTimeout(hideCursor, 1000);
 });
 
 function hideCursor() {
