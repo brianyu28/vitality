@@ -17,6 +17,6 @@ setup(
     name="vitality",
     packages=["vitality"],
     url="https://github.com/brianyu28/vitality",
-    version="0.1.0"
+    version="0.1.1"
 )
 
