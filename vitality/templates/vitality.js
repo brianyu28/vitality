@@ -1,5 +1,6 @@
 const state = {
     aspectRatio: null,
+    cursorTimeout: null,
     objects: [],
     references: {},
     slideIdx: null,
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("background-color", "black");
 
     renderSlide(0);
+    state.cursorTimeout = setTimeout(hideCursor, 2000);
 });
 
 // Window resizes, resize SVG to fit
@@ -57,6 +59,16 @@ window.addEventListener("keydown", (e) => {
             break;
     }
 });
+
+window.addEventListener("mousemove", () => {
+    clearTimeout(state.cursorTimeout);
+    document.body.style.cursor = "";
+    state.cursorTimeout = setTimeout(hideCursor, 2000);
+});
+
+function hideCursor() {
+    document.body.style.cursor = "none";
+}
 
 function renderSlide(slideIdx) {
 

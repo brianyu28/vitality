@@ -16,6 +16,7 @@
             const data = {"defaults": {"font": "\u0027Montserrat\u0027, sans-serif"}, "fonts": ["Montserrat"], "size": {"height": 1080, "width": 1920}, "slides": [{"content": "foo", "font": "\u0027Montserrat\u0027, sans-serif", "layout": "title", "size": 120}, {"content": "bar", "font": "\u0027Montserrat\u0027, sans-serif", "layout": "title", "size": 120}, {"content": "baz", "font": "\u0027Montserrat\u0027, sans-serif", "layout": "title", "size": 120}], "title": "Section 1"};
             const state = {
     aspectRatio: null,
+    cursorTimeout: null,
     objects: [],
     references: {},
     slideIdx: null,
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("background-color", "black");
 
     renderSlide(0);
+    state.cursorTimeout = setTimeout(hideCursor, 2000);
 });
 
 // Window resizes, resize SVG to fit
@@ -73,6 +75,16 @@ window.addEventListener("keydown", (e) => {
             break;
     }
 });
+
+window.addEventListener("mousemove", () => {
+    clearTimeout(state.cursorTimeout);
+    document.body.style.cursor = "";
+    state.cursorTimeout = setTimeout(hideCursor, 2000);
+});
+
+function hideCursor() {
+    document.body.style.cursor = "none";
+}
 
 function renderSlide(slideIdx) {
 
