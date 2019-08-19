@@ -120,10 +120,11 @@ function renderSlide(slideIdx, transition=false) {
         state.references = {};
     }
 
-    // Get references in new slide
+    // Get references in new slide present at start of slide
     const references =
         new Set(slide.objects
-                     .filter(obj => obj.id !== undefined)
+                     .filter(obj => obj.id !== undefined &&
+                            (obj.build === false || obj.build === undefined))
                      .map(obj => obj.id));
 
     // Get objects that need to make a transition
@@ -161,6 +162,9 @@ function renderSlide(slideIdx, transition=false) {
 
     // Add objects
     renderObjects(slide, transitioners);
+
+    // Filter out undefined builds
+    state.builds = state.builds.filter(build => build !== undefined);
 }
 
 function renderBulletsSlide(slide) {
@@ -260,7 +264,10 @@ function renderObjects(slide, transitioners) {
     for (let i = 0; i < slide.objects.length; i++) {
         const object = slide.objects[i];
 
-        if (object.id !== undefined && transitioners[object.id] !== undefined) {
+        // Check if object has id, should be transitioned, and isn't a later build
+        if (object.id !== undefined
+            && transitioners[object.id] !== undefined
+            && (object.build === undefined || object.build === false)) {
 
             // Transition object from previous slide
             const obj = transitioners[object.id].object;
@@ -278,6 +285,18 @@ function renderObjects(slide, transitioners) {
             }
             for (let key in object.style) {
                 obj.style(key, object.style[key]);
+            }
+
+            // Check if object should be built later
+            if (object.build) {
+                obj.attr("display", "none");
+                if (object.build === true) {
+                    state.builds.push([obj]);
+                } else if (state.builds[object.build] === undefined) {
+                    state.builds[object.build] = [obj];
+                } else {
+                    state.builds[object.build].push(obj);
+                }
             }
 
             // Record reference to object if identified
