@@ -84,7 +84,7 @@ class FileChangeHandler(FileSystemEventHandler):
 def watch():
     print("Watching...")
     event_handler = FileChangeHandler()
-    event_handler.dirname = os.path.dirname(args.config)
+    event_handler.dirname = os.path.dirname(os.path.abspath(args.config))
     observer = Observer()
     observer.schedule(event_handler, event_handler.dirname)
     observer.start()
