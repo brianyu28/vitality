@@ -1,3 +1,5 @@
+import copy
+
 from types import SimpleNamespace
 
 from . import Error
@@ -21,6 +23,9 @@ DEFAULTS = SimpleNamespace(
     # Transitions
     transition_length=500,
 
+    # Builds
+    build_bullets=False,
+
     # Font Sizes
     heading_font_size=80,
     section_font_size=100,
@@ -35,35 +40,11 @@ DEFAULTS = SimpleNamespace(
 
 def presentation_data(config):
     """Converts YML presentation representation into instructions object."""
-    defaults = config.get("defaults", {})
+    defaults = copy.copy(DEFAULTS)
+    defaults.__dict__.update(config.get("defaults", {}))
     data = {
         "title": config.get("title"),
-        "defaults": {
-
-            # Spacing
-            "bullets_padding_left": defaults.get("bullets_padding_left", DEFAULTS.bullets_padding_left),
-            "heading_padding_left": defaults.get("heading_padding_left", DEFAULTS.heading_padding_left),
-            "heading_padding_top": defaults.get("heading_padding_top", DEFAULTS.heading_padding_top),
-
-            # Layout
-            "background_color": defaults.get("background_color", DEFAULTS.background_color),
-            "color": defaults.get("color", DEFAULTS.color),
-            "font": defaults.get("font", DEFAULTS.font),
-
-            # Transitions
-            "transition_length": defaults.get("transition_length", DEFAULTS.transition_length),
-
-            # Font Sizes
-            "heading_font_size": defaults.get("heading_font_size", DEFAULTS.heading_font_size),
-            "section_font_size": defaults.get("section_font_size", DEFAULTS.section_font_size),
-            "subtitle_font_size": defaults.get("subtitle_font_size", DEFAULTS.subtitle_font_size),
-            "text_font_size": defaults.get("text_font_size", DEFAULTS.text_font_size),
-            "title_font_size": defaults.get("title_font_size", DEFAULTS.title_font_size),
-
-            # Bullets
-            "bullet": defaults.get("bullet", DEFAULTS.bullet),
-            "bullet_spacing": defaults.get("bullet_spacing", DEFAULTS.bullet_spacing)
-        },
+        "defaults": defaults.__dict__,
         "fonts": config.get("fonts", []),
         "size": {
             "width": config.get("size", {}).get("width", DEFAULTS.width),
