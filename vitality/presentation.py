@@ -63,16 +63,13 @@ def presentation_data(config):
             slide = {"text": slide}
             result = section_slide(slide, data)
 
-        elif slide.get("type", "blank") == "blank":
-            result = blank_slide(slide, data)
-
-        elif slide["type"] == "section":
+        elif slide.get("type") == "section":
             result = section_slide(slide, data)
 
-        elif slide["type"] == "title":
+        elif slide.get("type") == "title" or all(prop in slide for prop in ["title", "subtitle"]):
             result = title_slide(slide, data)
 
-        elif slide["type"] == "bullets":
+        elif slide.get("type") == "bullets":
             result = bullets_slide(slide, data)
 
         else:
