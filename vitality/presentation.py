@@ -218,14 +218,29 @@ def title_slide(slide, data):
 def add_objects(result, objects, data):
     for obj in objects:
 
-        # If there's a matching object in previous slide, carry over properties other than build
+        # If there's a matching object in previous slide, carry over properties
         if "id" in obj and len(data["slides"]) > 0:
+
+            # Look for matching object on previous slide
             for prev_obj in data["slides"][-1].get("objects", []):
                 if prev_obj.get("id") == obj["id"]:
+
+                    # Copy old properties, remove "build" property
                     temp_obj = copy.copy(prev_obj)
                     if "build" in temp_obj:
                         del temp_obj["build"]
-                    temp_obj.update(obj)
+
+                    # Update attrs and style fields
+                    for prop in ["attrs", "style"]:
+                        if prop in temp_obj:
+                            temp_obj[prop] = copy.copy(temp_obj[prop])
+                        for key in obj.get(prop, {}):
+                            temp_obj[prop][key] = obj[prop][key]
+
+                    # Update other fields on the object
+                    for prop in ["id", "type", "transition_length"]:
+                        if prop in obj:
+                            temp_obj[prop] = obj[prop]
                     obj = temp_obj
 
         if "transition_length" not in obj:
