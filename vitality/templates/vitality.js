@@ -62,7 +62,7 @@ window.addEventListener("keydown", (e) => {
             break;
         case KEYS.leftArrow:
             e.preventDefault();
-            renderSlide(Math.max(state.slideIdx - 1, 0));
+            renderPrevious();
             break;
         case KEYS.z:
             e.preventDefault();
@@ -92,6 +92,18 @@ function renderNext() {
             obj.attr("display", "");
         });
         state.buildIdx += 1;
+    }
+}
+
+function renderPrevious() {
+    if (state.buildIdx === 0) {
+        renderSlide(Math.max(state.slideIdx - 1, 0));
+    } else {
+        // Render previous build
+        state.buildIdx -= 1;
+        state.builds[state.buildIdx].forEach(obj => {
+            obj.attr("display", "none");
+        });
     }
 }
 
