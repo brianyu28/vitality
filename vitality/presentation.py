@@ -142,6 +142,7 @@ def bullets_slide(slide, data):
             "size": slide["title"].get("size", data["defaults"]["heading_font_size"])
         },
         "bullets": {
+            "build_bullets": slide["bullets"].get("build", data["defaults"]["build_bullets"]),
             "bullet": slide["bullets"].get("bullet", data["defaults"]["bullet"]),
             "color": slide["bullets"].get("color", data["defaults"]["color"]),
             "content": slide["bullets"].get("text", []),
@@ -216,6 +217,15 @@ def title_slide(slide, data):
 
 def add_objects(result, objects, data):
     for obj in objects:
+
+        # If there's a matching object in previous slide, carry over properties
+        if "id" in obj and len(data["slides"]) > 0:
+            for prev_obj in data["slides"][-1].get("objects", []):
+                if prev_obj.get("id") == obj["id"]:
+                    temp_obj = copy.copy(prev_obj)
+                    temp_obj.update(obj)
+                    obj = temp_obj
+
         if "transition_length" not in obj:
             obj["transition_length"] = data["defaults"]["transition_length"]
         result["objects"].append(obj)

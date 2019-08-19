@@ -8,6 +8,7 @@ const state = {
     objects: [],
     references: {},
     slideIdx: null,
+    buildIdx: null,
     svg: null
 };
 
@@ -112,8 +113,10 @@ function renderSlide(slideIdx, transition=false) {
         if (transition === false ||
             Object.values(transitioners).some((k) => k.object == state.objects[i]) === false) {
             state.objects[i].remove();
+            delete state.objects[i];
         }
     }
+    state.objects = state.objects.filter(obj => obj !== undefined);
 
     // Update with current slide
     state.svg.style("background-color", slide.backgroundColor);
