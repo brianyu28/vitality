@@ -9,6 +9,7 @@ const state = {
     references: {},
     slideIdx: null,
     buildIdx: null,
+    builds: [],
     svg: null
 };
 
@@ -57,7 +58,7 @@ window.addEventListener("keydown", (e) => {
         case KEYS.rightArrow:
         case KEYS.space:
             e.preventDefault();
-            renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1), transition=true);
+            renderNext();
             break;
         case KEYS.leftArrow:
             e.preventDefault();
@@ -82,10 +83,24 @@ function hideCursor() {
     document.body.style.cursor = "none";
 }
 
+function renderNext() {
+    if (state.buildIdx === state.builds.length) {
+        renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1), transition=true);
+    } else {
+        // Render next build
+        state.builds[state.buildIdx].forEach(obj => {
+            obj.attr("display", "");
+        });
+        state.buildIdx += 1;
+    }
+}
+
 function renderSlide(slideIdx, transition=false) {
 
     // Update slide index
     state.slideIdx = slideIdx;
+    state.buildIdx = 0;
+    state.builds = [];
     const slide = data.slides[slideIdx];
 
     // If no transition, then don't need previous references
@@ -163,10 +178,15 @@ function renderBulletsSlide(slide) {
              .attr("font-family", slide.bullets.font)
              .style("fill", slide.bullets.color);
     for (let i = 0; i < slide.bullets.content.length; i++) {
-        bullets.append("tspan")
-               .attr("x", slide.bullets.padding_left)
-               .attr("dy", slide.bullets.size + slide.bullets.spacing)
-               .text(slide.bullets.bullet + (slide.bullets.content[i] || " "));
+        const bullet =
+            bullets.append("tspan")
+                   .attr("x", slide.bullets.padding_left)
+                   .attr("dy", slide.bullets.size + slide.bullets.spacing)
+                   .attr("display", slide.bullets.build ? "none" : "")
+                   .text(slide.bullets.bullet + (slide.bullets.content[i] || " "));
+        if (slide.bullets.build) {
+            state.builds.push([bullet]);
+        }
     }
     state.objects.push(bullets);
 }

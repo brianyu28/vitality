@@ -142,7 +142,7 @@ def bullets_slide(slide, data):
             "size": slide["title"].get("size", data["defaults"]["heading_font_size"])
         },
         "bullets": {
-            "build_bullets": slide["bullets"].get("build", data["defaults"]["build_bullets"]),
+            "build": slide.get("build", data["defaults"]["build_bullets"]),
             "bullet": slide["bullets"].get("bullet", data["defaults"]["bullet"]),
             "color": slide["bullets"].get("color", data["defaults"]["color"]),
             "content": slide["bullets"].get("text", []),
