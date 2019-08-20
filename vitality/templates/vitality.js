@@ -10,13 +10,19 @@ const state = {
     slideIdx: null,
     buildIdx: null,
     builds: [],
+    go: false,
+    prev: null,
     svg: null
 };
 
 const KEYS = {
+    enter: 13,
+    esc: 27,
     space: 32,
     leftArrow: 37,
     rightArrow: 39,
+    b: 66,
+    g: 71,
     z: 90
 }
 
@@ -40,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("margin-bottom", padding)
                   .style("background-color", "black");
 
-    renderSlide(0);
+    renderSlide(0, 0);
     state.cursorTimeout = setTimeout(hideCursor, 1000);
 });
 
@@ -54,6 +60,31 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("keydown", (e) => {
+    if (state.go !== false) {
+        switch (e.keyCode) {
+            case KEYS.esc:
+                state.go = false;
+                break;
+            case KEYS.enter:
+                const slideNo = parseInt(state.go);
+                if (isNaN(slideNo)) {
+                    const slideIndex = data.slide_ids[state.go];
+                    if (slideIndex !== undefined) {
+                        state.prev = {slideIdx: state.slideIdx, buildIdx: state.buildIdx};
+                        renderSlide(slideIndex, 0);
+                    }
+                } else if (slideNo >= 0 && slideNo <= data.slides.length - 1) {
+                    state.prev = {slideIdx: state.slideIdx, buildIdx: state.buildIdx};
+                    renderSlide(slideNo, 0);
+                }
+                state.go = false;
+                break;
+            default:
+                state.go += String.fromCharCode(e.keyCode);
+                break;
+        }
+
+    }
     switch (e.keyCode) {
         case KEYS.rightArrow:
         case KEYS.space:
@@ -64,9 +95,19 @@ window.addEventListener("keydown", (e) => {
             e.preventDefault();
             renderPrevious();
             break;
+        case KEYS.b: // go back to prev
+            if (state.prev !== null) {
+                renderSlide(state.prev.slideIdx, state.prev.buildIdx);
+                state.prev = null;
+            }
+            break;
+        case KEYS.g: // go to slide
+            e.preventDefault();
+            state.go = "";
+            break;
         case KEYS.z:
             e.preventDefault();
-            renderSlide(0);
+            renderSlide(0, 0);
             break;
         default:
             break;
@@ -85,7 +126,7 @@ function hideCursor() {
 
 function renderNext() {
     if (state.buildIdx === state.builds.length) {
-        renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1), transition=true);
+        renderSlide(Math.min(state.slideIdx + 1, data.slides.length - 1), 0, transition=true);
     } else {
         // Render next build
         state.builds[state.buildIdx].forEach(obj => {
@@ -97,7 +138,7 @@ function renderNext() {
 
 function renderPrevious() {
     if (state.buildIdx === 0) {
-        renderSlide(Math.max(state.slideIdx - 1, 0));
+        renderSlide(Math.max(state.slideIdx - 1, 0), 0);
     } else {
         // Render previous build
         state.buildIdx -= 1;
@@ -107,7 +148,7 @@ function renderPrevious() {
     }
 }
 
-function renderSlide(slideIdx, transition=false) {
+function renderSlide(slideIdx, buildIdx, transition=false) {
 
     // Update slide index
     state.slideIdx = slideIdx;
@@ -168,6 +209,14 @@ function renderSlide(slideIdx, transition=false) {
 
     // Filter out undefined builds
     state.builds = state.builds.filter(build => build !== undefined);
+
+    // Render builds as needed (e.g. if returning back to slide)
+    for (let i = 0; i < buildIdx; i++) {
+        state.builds[i].forEach(obj => {
+            obj.attr("display", "");
+        });
+    }
+    state.buildIdx = buildIdx;
 }
 
 function renderBulletsSlide(slide) {

@@ -53,6 +53,8 @@ def presentation_data(config):
         },
         "slides": []
     }
+
+    # Add configuration results for all slides
     for slide in config.get("slides", []):
 
         if slide is None:
@@ -83,6 +85,13 @@ def presentation_data(config):
             add_objects(result, slide.get("objects"), data)
 
         data["slides"].append(result)
+
+
+    # Add slide identifier mapping
+    data["slide_ids"] = {}
+    for i, slide in enumerate(data["slides"]):
+        if slide["id"] is not None:
+            data["slide_ids"][slide["id"].upper()] = i
     return data
 
 
@@ -90,6 +99,7 @@ def base_slide(slide, data):
     """Basic elements on every slide."""
     return {
         "backgroundColor": slide.get("background_color", data["defaults"]["background_color"]),
+        "id": slide.get("id"),
         "objects": []
     }
 
