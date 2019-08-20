@@ -16,6 +16,12 @@ DEFAULTS = SimpleNamespace(
     heading_padding_left=50,
     heading_padding_top=80,
 
+    # Text
+    text_x=0,
+    text_y=0,
+    text_baseline="baseline",
+    text_anchor="start",
+
     # Layout
     background_color="black",
     color="white",
@@ -288,5 +294,43 @@ def add_objects(result, objects, data):
                     "zoom": obj.get("style", {}).get("zoom", data["defaults"]["html_zoom"])
                 },
                 "content": obj.get("html", "")
+            }
+        elif obj.get("type") == "text":
+
+            # Handle missing attributes on object
+            if "attrs" not in obj:
+                obj["attrs"] = {}
+            if "style" not in obj:
+                obj["style"] = {}
+            if "text" not in obj:
+                obj["text"] = []
+            elif not isinstance(obj["text"], list):
+                obj["text"] = obj["text"].split("\n")
+            obj["text"] = [str(item) for item in obj["text"]]
+
+
+            # Auto-horizontally or vertically center
+            if obj.get("hcenter") == True or obj.get("center") == True:
+                obj["attrs"]["x"] = "50%"
+                obj["attrs"]["text_anchor"] = "middle"
+            font_size = int(obj.get("font_size", data["defaults"]["text_font_size"]))
+            if obj.get("vcenter") == True or obj.get("center") == True:
+                obj["attrs"]["y"] = (data["size"]["height"] / 2) - ((len(obj["text"]) * (font_size + 5)) / 2)
+                obj["attrs"]["dominant_baseline"] = "middle"
+            obj = {
+                "type": "text",
+                "attrs": {
+                    "x": obj.get("attrs", {}).get("x", data["defaults"]["text_x"]),
+                    "y": obj.get("attrs", {}).get("y", data["defaults"]["text_y"]),
+                    "dominant-baseline": obj.get("attrs", {}).get("dominant_baseline", data["defaults"]["text_baseline"]),
+                    "text-anchor": obj.get("attrs", {}).get("text_anchor", data["defaults"]["text_anchor"]),
+                    "font-size": font_size,
+                    "font-family": obj.get("font", data["defaults"]["font"]),
+                    "xml:space": "preserve"
+                },
+                "style": {
+                    "fill": obj.get("style", {}).get("color", data["defaults"]["color"])
+                },
+                "text": obj["text"]
             }
         result["objects"].append(obj)

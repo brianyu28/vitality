@@ -382,6 +382,14 @@ function renderObjects(slide, transitioners) {
                 for (let key in object.style) {
                     obj.style(key, object.style[key]);
                 }
+                if (object.text !== undefined) {
+                    for (let i = 0; i < object.text.length; i++) {
+                        obj.append("tspan")
+                           .attr("x", object.attrs.x)
+                           .attr("dy", parseInt(object.attrs["font-size"]) + 5)
+                           .text(object.text[i]);
+                    }
+                }
             }
 
             // Check if object should be built later
