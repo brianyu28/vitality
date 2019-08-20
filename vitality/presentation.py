@@ -72,6 +72,9 @@ def presentation_data(config):
         elif slide.get("type") == "bullets":
             result = bullets_slide(slide, data)
 
+        elif slide.get("type") == "html" or "html" in slide:
+            result = html_slide(slide, data)
+
         else:
             result = blank_slide(slide, data)
 
@@ -150,6 +153,17 @@ def bullets_slide(slide, data):
         }
     })
     return result
+
+
+def html_slide(slide, data):
+    """Slide with custom HTML."""
+    result = base_slide(slide, data)
+    result.update({
+        "layout": "html",
+        "content": slide.get("html", "")
+    })
+    return result
+
 
 def section_slide(slide, data):
     """Section divider slide, just a single heading."""

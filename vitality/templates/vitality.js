@@ -152,6 +152,9 @@ function renderSlide(slideIdx, transition=false) {
         case "bullets":
             renderBulletsSlide(slide);
             break;
+        case "html":
+            renderHTMLSlide(slide);
+            break;
         case "section":
             renderSectionSlide(slide);
             break;
@@ -205,6 +208,25 @@ function renderBulletsSlide(slide) {
         }
     }
     state.objects.push(bullets);
+}
+
+function renderHTMLSlide(slide) {
+    const html =
+        state.svg.append("foreignObject")
+                 .attr("x", 0)
+                 .attr("y", 0)
+                 .attr("width", "100%")
+                 .attr("height", "100%");
+    html.append("xhtml:div")
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .style("background-color", slide.backgroundColor)
+        .style("font-size", "220%")
+        .style("margin", 0)
+        .style("position", "absolute")
+        .style("height", "100%")
+        .style("width", "100%")
+        .html(slide.content || "");
+    state.objects.push(html);
 }
 
 function renderSectionSlide(slide) {
