@@ -83,7 +83,8 @@ window.addEventListener("keydown", (e) => {
                 state.go += String.fromCharCode(e.keyCode);
                 break;
         }
-
+        e.preventDefault();
+        return;
     }
     switch (e.keyCode) {
         case KEYS.rightArrow:
