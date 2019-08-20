@@ -88,7 +88,7 @@ def presentation_data(config):
             result = blank_slide(slide, data)
 
         if slide.get("objects") is not None:
-            add_objects(result, slide.get("objects"), data)
+            add_objects(result, slide.get("objects"), data, copy_objects=slide.get("copy_objects", False))
 
         data["slides"].append(result)
 
@@ -249,7 +249,7 @@ def title_slide(slide, data):
     return result
 
 
-def add_objects(result, objects, data):
+def add_objects(result, objects, data, copy_objects=False):
     for obj in objects:
 
         # If there's a matching object in previous slide, carry over properties
@@ -344,3 +344,10 @@ def add_objects(result, objects, data):
                 obj["attrs"]["xlink:href"] = obj["href"]
 
         result["objects"].append(obj)
+
+    # Copy objects
+    if copy_objects and len(data["slides"]) > 0:
+        this_ids = {obj["id"] for obj in result["objects"] if obj.get("id") is not None}
+        for obj in data["slides"][-1].get("objects", []):
+            if obj.get("id") is not None and obj["id"] not in this_ids:
+                result["objects"].append(copy.copy(obj))
