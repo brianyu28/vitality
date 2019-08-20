@@ -5,6 +5,7 @@ import traceback
 
 import argparse
 import jinja2
+import numexpr
 import termcolor
 import yaml
 
@@ -18,6 +19,16 @@ env = jinja2.Environment(
     loader=jinja2.PackageLoader("vitality", "templates")
 )
 args = None
+
+
+def calc_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    try:
+        return numexpr.evaluate(value).item()
+    except Exception as e:
+        print(e)
+        return 0
+yaml.add_constructor("!calc", calc_constructor)
 
 
 def main():

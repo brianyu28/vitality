@@ -10,6 +10,7 @@ setup(
     install_requires=[
         "argparse>=1.4",
         "jinja2>=2.10",
+        "numexpr>=2.7",
         "pyyaml>=3.13",
         "termcolor>=1.1",
         "watchdog>=0.9"
