@@ -349,6 +349,12 @@ function renderObjects(slide, transitioners) {
                   .duration(transitioners[object.id].transition_length)
                   .ease(d3.easeLinear);
             obj.transition(transition).call(transitionCall, object.attrs, object.style);
+
+            // Record reference to object
+            state.references[object.id] = {
+                object: obj,
+                transition_length: object.transition_length
+            };
         } else {
 
             let obj = null;
