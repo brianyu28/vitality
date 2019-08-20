@@ -136,6 +136,12 @@ def bullets_slide(slide, data):
     if not isinstance(slide["bullets"].get("text", []), list):
         slide["bullets"]["text"] = [slide["bullets"]["text"]]
 
+    # Handling bullet styling
+    for i in range(len(slide["bullets"]["text"])):
+        bullet = slide["bullets"]["text"][i]
+        if isinstance(bullet, str):
+            slide["bullets"]["text"][i] = {"text": bullet}
+
     # Allow specifying color and font for entire slide
     for prop in ["color", "font", "padding_left"]:
         if slide.get(prop):

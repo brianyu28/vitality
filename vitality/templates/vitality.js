@@ -251,7 +251,8 @@ function renderBulletsSlide(slide) {
                    .attr("x", slide.bullets.padding_left)
                    .attr("dy", slide.bullets.size + slide.bullets.spacing)
                    .attr("display", slide.bullets.build ? "none" : "")
-                   .text(slide.bullets.bullet + (slide.bullets.content[i] || " "));
+                   .style("fill", (slide.bullets.content[i] || {}).color || slide.bullets.color)
+                   .text(slide.bullets.bullet + ((slide.bullets.content[i] || {}).text || " "));
         if (slide.bullets.build) {
             state.builds.push([bullet]);
         }
