@@ -295,6 +295,8 @@ def add_objects(result, objects, data):
                 },
                 "content": obj.get("html", "")
             }
+
+        # Text objects
         elif obj.get("type") == "text":
 
             # Handle missing attributes on object
@@ -333,4 +335,12 @@ def add_objects(result, objects, data):
                 },
                 "text": obj["text"]
             }
+
+        # Image objects
+        elif obj.get("type") == "image":
+            if "attrs" not in obj:
+                obj["attrs"] = {}
+            if "href" in obj and "xlink:href" not in obj.get("attrs", {}):
+                obj["attrs"]["xlink:href"] = obj["href"]
+
         result["objects"].append(obj)
