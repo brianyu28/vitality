@@ -9,6 +9,7 @@ DEFAULTS = SimpleNamespace(
     # Dimensions
     height=1080,
     width=1920,
+    html_zoom="220%",
 
     # Spacing
     bullets_padding_left=100,
@@ -256,4 +257,20 @@ def add_objects(result, objects, data):
 
         if "transition_length" not in obj:
             obj["transition_length"] = data["defaults"]["transition_length"]
+
+        if obj.get("type") == "html":
+            obj = {
+                "type": "html",
+                "attrs": {
+                    "x": obj.get("attrs", {}).get("x", 0),
+                    "y": obj.get("attrs", {}).get("y", 0),
+                    "height": obj.get("attrs", {}).get("height", "100%"),
+                    "width": obj.get("attrs", {}).get("width", "100%")
+                },
+                "style": {
+                    "fill": obj.get("style", {}).get("fill", data["defaults"]["background_color"]),
+                    "zoom": obj.get("style", {}).get("zoom", data["defaults"]["html_zoom"])
+                },
+                "content": obj.get("html", "")
+            }
         result["objects"].append(obj)

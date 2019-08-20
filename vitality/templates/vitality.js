@@ -220,7 +220,7 @@ function renderHTMLSlide(slide) {
     html.append("xhtml:div")
         .attr("xmlns", "http://www.w3.org/2000/svg")
         .style("background-color", slide.backgroundColor)
-        .style("font-size", "220%")
+        .style("zoom", "220%")
         .style("margin", 0)
         .style("position", "absolute")
         .style("height", "100%")
@@ -300,13 +300,37 @@ function renderObjects(slide, transitioners) {
             obj.transition(transition).call(transitionCall, object.attrs, object.style);
         } else {
 
-            // Create new object
-            const obj = state.svg.append(object.type);
-            for (let key in object.attrs) {
-                obj.attr(key, object.attrs[key]);
-            }
-            for (let key in object.style) {
-                obj.style(key, object.style[key]);
+            let obj = null;
+
+            if (object.type === "html") {
+
+                // Create HTML object
+                obj =
+                    state.svg.append("foreignObject")
+                             .attr("x", object.attrs.x)
+                             .attr("y", object.attrs.y)
+                             .attr("height", object.attrs.height)
+                             .attr("width", object.attrs.width);
+                obj.append("xhtml:div")
+                   .attr("xmlns", "http://www.w3.org/2000/svg")
+                   .style("background-color", object.style.fill)
+                   .style("zoom", object.style.zoom)
+                   .style("margin", 0)
+                   .style("position", "absolute")
+                   .style("height", "100%")
+                   .style("width", "100%")
+                   .html(object.content || "");
+
+            } else {
+
+                // Create non-HTML object
+                obj = state.svg.append(object.type);
+                for (let key in object.attrs) {
+                    obj.attr(key, object.attrs[key]);
+                }
+                for (let key in object.style) {
+                    obj.style(key, object.style[key]);
+                }
             }
 
             // Check if object should be built later
