@@ -346,8 +346,10 @@ def add_objects(result, objects, data, copy_objects=False):
         result["objects"].append(obj)
 
     # Copy objects
+    copied = []
     if copy_objects and len(data["slides"]) > 0:
         this_ids = {obj["id"] for obj in result["objects"] if obj.get("id") is not None}
         for obj in data["slides"][-1].get("objects", []):
             if obj.get("id") is not None and obj["id"] not in this_ids:
-                result["objects"].append(copy.copy(obj))
+                copied.append(copy.copy(obj))
+    result["objects"] = copied + result["objects"]
