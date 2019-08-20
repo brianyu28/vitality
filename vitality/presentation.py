@@ -68,8 +68,8 @@ def presentation_data(config):
             result = blank_slide(slide, data)
 
         # Just string is a section slide
-        elif isinstance(slide, str):
-            slide = {"text": slide}
+        elif not isinstance(slide, dict):
+            slide = {"text": str(slide)}
             result = section_slide(slide, data)
 
         elif slide.get("type") == "section":
