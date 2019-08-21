@@ -220,6 +220,7 @@ function controlPanelMessageReceived(e) {
     control_state.selected = slideIdx;
     const new_container = control_state.slides[slideIdx].container;
     new_container.style("background-color", "#bbcc66");
+    new_container.node().scrollIntoView();
 }
 
 function hideCursor() {
