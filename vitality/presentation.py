@@ -334,8 +334,11 @@ def add_objects(result, objects, data, copy_objects=False):
                     "fill": obj.get("style", {}).get("color", data["defaults"]["color"])
                 },
                 "text": obj["text"],
-                "html": obj.get("html", False)
+                "html": obj.get("html", False),
+                "build": obj.get("build")
             }
+            if obj["build"] is None:
+                del obj["build"]
 
         # Image objects
         elif obj.get("type") == "image":
