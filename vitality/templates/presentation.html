@@ -6,12 +6,7 @@
             {{ data.title | default("Presentation", true) }}
         </title>
         <style>
-            .center {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-            }
+            {% include "styles.css" %}
         </style>
         {% for font in data.fonts %}
             <link href="https://fonts.googleapis.com/css?family={{ font }}&display=swap" rel="stylesheet">

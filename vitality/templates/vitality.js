@@ -12,7 +12,8 @@ const state = {
     builds: [],
     go: false,
     prev: null,
-    svg: null
+    svg: null,
+    control: null
 };
 
 const KEYS = {
@@ -31,11 +32,13 @@ const KEYS = {
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.search === "?control") {
         setupControlPanel();
+        window.addEventListener("message", controlPanelMessageReceived);
     } else {
         setupMainPresentation();
         window.addEventListener("keydown", mainKeyDownListener);
         window.addEventListener("resize", mainWindowResize);
         window.addEventListener("mousemove", mainWindowMouseMove);
+        window.addEventListener("message", mainWindowMessageReceived);
     }
 });
 
@@ -62,8 +65,53 @@ function setupMainPresentation() {
     state.cursorTimeout = setTimeout(hideCursor, 1000);
 }
 
+control_state = {
+    slides: [],
+    selected: null
+}
 function setupControlPanel() {
-    console.log("set up the control panel here...");
+    const body = document.querySelector("body");
+    body.style.margin = 0;
+    body.style.backgroundColor = "black";
+
+    const container = d3.select("body")
+                        .append("div")
+                        .style("display", "flex")
+                        .style("flex-wrap", "wrap")
+                        .style("justify-content", "center");
+
+    for (let i = 0; i < data.slides.length; i++) {
+        const slide_container =
+            container.append("div")
+                     .attr("data-slide", i)
+                     .style("margin", "10px")
+                     .style("background-color", "#525252");
+        const svg =
+            slide_container.append("svg")
+                           .attr("data-slide", i)
+                           .style("background-color", "white") // TODO: remove
+                           .attr("width", 300)
+                           .attr("height", 300 / (data.size.width / data.size.height))
+                           .style("margin", 10);
+            slide_container.append("div")
+                           .attr("data-slide", i)
+                           .style("font-family", "sans-serif")
+                           .style("font-size", "18px")
+                           .style("color", "white")
+                           .style("text-align", "center")
+                           .style("margin-bottom", "10px")
+                           .text(i)
+        control_state.slides[i] = {
+            container: slide_container,
+            svg: svg
+        };
+        slide_container.node().addEventListener("click", (e) => {
+            const slideIdx = parseInt(e.target.dataset.slide);
+            window.opener.postMessage({slideIdx: slideIdx}, "*");
+        });
+        renderSlidePreview(i, data.slides[i]);
+    }
+
 }
 
 // Window resizes, resize SVG to fit
@@ -119,7 +167,14 @@ function mainKeyDownListener(e) {
             }
             break;
         case KEYS.c: // open control panel
-            window.open(location.origin + location.pathname + "?control", "", "top=50,left=50,width=800,height=600");
+            if (state.control !== null) {
+                state.control.close();
+            }
+            state.control = window.open(location.origin + location.pathname + "?control", "", "top=50,left=50,width=1100,height=600");
+            setTimeout(() => {
+                state.control.postMessage({slideIdx: state.slideIdx}, "*");
+            }, 500);
+            break;
         case KEYS.g: // go to slide
             e.preventDefault();
             state.go = "";
@@ -137,6 +192,22 @@ function mainWindowMouseMove() {
     clearTimeout(state.cursorTimeout);
     document.body.style.cursor = "";
     state.cursorTimeout = setTimeout(hideCursor, 1000);
+}
+
+function mainWindowMessageReceived(e) {
+    const slideIdx = e.data.slideIdx;
+    renderSlide(slideIdx, 0, transition=false);
+}
+
+function controlPanelMessageReceived(e) {
+    const slideIdx = e.data.slideIdx;
+    if (control_state.selected !== null) {
+        const old_container = control_state.slides[control_state.selected].container;
+        old_container.style("background-color", "#525252");
+    }
+    control_state.selected = slideIdx;
+    const new_container = control_state.slides[slideIdx].container;
+    new_container.style("background-color", "#bbcc66");
 }
 
 function hideCursor() {
@@ -174,6 +245,11 @@ function renderSlide(slideIdx, buildIdx, transition) {
     state.buildIdx = 0;
     state.builds = [];
     const slide = data.slides[slideIdx];
+
+    // Notify control panel if it exists
+    if (state.control !== null) {
+        state.control.postMessage({slideIdx: slideIdx}, "*");
+    }
 
     // If no transition, then don't need previous references
     if (transition === false) {
@@ -236,6 +312,12 @@ function renderSlide(slideIdx, buildIdx, transition) {
         });
     }
     state.buildIdx = buildIdx;
+}
+
+function renderSlidePreview(i, slide) {
+    console.log("TODO");
+    console.log("Rendering slide preview");
+    console.log(i);
 }
 
 function renderBulletsSlide(slide) {
