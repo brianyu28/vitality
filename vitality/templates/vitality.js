@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.search === "?control") {
         setupControlPanel();
         window.addEventListener("message", controlPanelMessageReceived);
+        window.addEventListener("keydown", controlPanelKeyDownListener);
     } else {
         setupMainPresentation();
         window.addEventListener("keydown", mainKeyDownListener);
@@ -56,7 +57,7 @@ function setupMainPresentation() {
                   .append("svg")
                   .attr("width", window.innerWidth)
                   .attr("height", window.innerWidth / state.aspectRatio)
-                  .attr("viewBox", "0 0 1920 1080")
+                  .attr("viewBox", `0 0 ${data.size.width} ${data.size.height}`)
                   .style("margin-top", padding)
                   .style("margin-bottom", padding)
                   .style("background-color", "black");
@@ -89,6 +90,7 @@ function setupControlPanel() {
         const svg =
             slide_container.append("svg")
                            .attr("data-slide", i)
+                           .attr("viewBox", `0 0 ${data.size.width} ${data.size.height}`)
                            .style("background-color", "white") // TODO: remove
                            .attr("width", 300)
                            .attr("height", 300 / (data.size.width / data.size.height))
@@ -106,7 +108,8 @@ function setupControlPanel() {
             svg: svg
         };
         slide_container.node().addEventListener("click", (e) => {
-            const slideIdx = parseInt(e.target.dataset.slide);
+            const slide_container = e.path[e.path.length - 6];
+            const slideIdx = parseInt(slide_container.dataset.slide);
             window.opener.postMessage({slideIdx: slideIdx}, "*");
         });
         renderSlidePreview(i, data.slides[i]);
@@ -188,6 +191,11 @@ function mainKeyDownListener(e) {
     }
 }
 
+// Passes keystrokes along from control panel to main window
+function controlPanelKeyDownListener(e) {
+    window.opener.postMessage({keyDown: e.keyCode}, "*");
+}
+
 function mainWindowMouseMove() {
     clearTimeout(state.cursorTimeout);
     document.body.style.cursor = "";
@@ -196,7 +204,12 @@ function mainWindowMouseMove() {
 
 function mainWindowMessageReceived(e) {
     const slideIdx = e.data.slideIdx;
-    renderSlide(slideIdx, 0, transition=false);
+    if (slideIdx !== undefined && !isNaN(slideIdx)) {
+        renderSlide(slideIdx, 0, transition=false);
+    }
+    else if (e.data.keyDown !== undefined) {
+        mainKeyDownListener({keyCode: e.data.keyDown, preventDefault: () => null});
+    }
 }
 
 function controlPanelMessageReceived(e) {
@@ -315,14 +328,28 @@ function renderSlide(slideIdx, buildIdx, transition) {
 }
 
 function renderSlidePreview(i, slide) {
-    console.log("TODO");
-    console.log("Rendering slide preview");
-    console.log(i);
+    const previewSvg = control_state.slides[i].svg;
+    previewSvg.style("background-color", slide.backgroundColor);
+    switch (slide.layout) {
+        case "bullets":
+            renderBulletsSlide(slide, svg=previewSvg, build=false);
+            break;
+        case "html":
+            renderHTMLSlide(slide, svg=previewSvg, build=false);
+            break;
+        case "section":
+            renderSectionSlide(slide, svg=previewSvg, build=false);
+            break;
+        case "title":
+            renderTitleSlide(slide, svg=previewSvg, build=false);
+            break;
+    }
+    renderObjects(slide, {}, svg=previewSvg, build=false);
 }
 
-function renderBulletsSlide(slide) {
+function renderBulletsSlide(slide, svg=null, build=true) {
     const heading =
-        state.svg.append("text")
+        (svg || state.svg).append("text")
              .attr("x", slide.title.padding_left)
              .attr("y", slide.title.padding_top + slide.title.size)
              .attr("font-size", slide.title.size)
@@ -339,7 +366,7 @@ function renderBulletsSlide(slide) {
                      + slide.title.size + (bullets_height / 2)
                      - bullet_height * (slide.bullets.content.length / 2);
     const bullets =
-        state.svg.append("text")
+        (svg || state.svg).append("text")
              .attr("x", slide.bullets.padding_left)
              .attr("y", bullet_y)
              .attr("dominant-baseline", "middle")
@@ -351,7 +378,7 @@ function renderBulletsSlide(slide) {
             bullets.append("tspan")
                    .attr("x", slide.bullets.padding_left)
                    .attr("dy", slide.bullets.size + slide.bullets.spacing)
-                   .attr("display", slide.bullets.build ? "none" : "")
+                   .attr("display", (build && slide.bullets.build) ? "none" : "")
                    .style("fill", (slide.bullets.content[i] || {}).color || slide.bullets.color)
                    .text(slide.bullets.bullet + ((slide.bullets.content[i] || {}).text || " "));
         if (slide.bullets.build) {
@@ -361,9 +388,9 @@ function renderBulletsSlide(slide) {
     state.objects.push(bullets);
 }
 
-function renderHTMLSlide(slide) {
+function renderHTMLSlide(slide, svg=null, build=true) {
     const html =
-        state.svg.append("foreignObject")
+        (svg || state.svg).append("foreignObject")
                  .attr("x", 0)
                  .attr("y", 0)
                  .attr("width", "100%")
@@ -380,9 +407,9 @@ function renderHTMLSlide(slide) {
     state.objects.push(html);
 }
 
-function renderSectionSlide(slide) {
+function renderSectionSlide(slide, svg=null, build=true) {
     const section =
-        state.svg.append("text")
+        (svg || state.svg).append("text")
              .attr("x", "50%")
              .attr("y", "50%")
              .attr("dominant-baseline", "middle")
@@ -394,9 +421,9 @@ function renderSectionSlide(slide) {
     state.objects.push(section);
 }
 
-function renderTitleSlide(slide) {
+function renderTitleSlide(slide, svg=null, build=true) {
     const title =
-        state.svg.append("text")
+        (svg || state.svg).append("text")
              .attr("x", "50%")
              .attr("y", "45%")
              .attr("dominant-baseline", "middle")
@@ -408,7 +435,7 @@ function renderTitleSlide(slide) {
     state.objects.push(title);
 
     const subtitle =
-        state.svg.append("text")
+        (svg || state.svg).append("text")
              .attr("x", "50%")
              .attr("y", "60%")
              .attr("dominant-baseline", "middle")
@@ -432,7 +459,7 @@ function transitionCall(transition, attrs, style) {
         transition.style(key, style[key]);
 }
 
-function renderObjects(slide, transitioners) {
+function renderObjects(slide, transitioners, svg=null, build=true) {
     state.references = {};
     for (let i = 0; i < slide.objects.length; i++) {
         const object = slide.objects[i];
@@ -440,6 +467,7 @@ function renderObjects(slide, transitioners) {
         // Check if object has id, should be transitioned, and isn't a later build
         if (object.id !== undefined
             && transitioners[object.id] !== undefined
+            && build
             && (object.build === undefined || object.build === false)) {
 
             // Transition object from previous slide
@@ -463,7 +491,7 @@ function renderObjects(slide, transitioners) {
 
                 // Create HTML object
                 obj =
-                    state.svg.append("foreignObject")
+                    (svg || state.svg).append("foreignObject")
                              .attr("x", object.attrs.x)
                              .attr("y", object.attrs.y)
                              .attr("height", object.attrs.height)
@@ -481,7 +509,7 @@ function renderObjects(slide, transitioners) {
             } else {
 
                 // Create non-HTML object
-                obj = state.svg.append(object.type);
+                obj = (svg || state.svg).append(object.type);
                 for (let key in object.attrs) {
                     obj.attr(key, object.attrs[key]);
                 }
@@ -499,7 +527,7 @@ function renderObjects(slide, transitioners) {
             }
 
             // Check if object should be built later
-            if (object.build) {
+            if (build && object.build) {
                 obj.attr("display", "none");
                 if (object.build === true) {
                     state.builds.push([obj]);
