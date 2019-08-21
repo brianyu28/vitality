@@ -377,7 +377,7 @@ function renderBulletsSlide(slide, svg=null, build=true) {
         const bullet =
             bullets.append("tspan")
                    .attr("x", slide.bullets.padding_left)
-                   .attr("dy", slide.bullets.size + slide.bullets.spacing)
+                   .attr("dy", i > 0 ? slide.bullets.size + slide.bullets.spacing : 0)
                    .attr("display", (build && slide.bullets.build) ? "none" : "")
                    .style("fill", (slide.bullets.content[i] || {}).color || slide.bullets.color)
                    .text(slide.bullets.bullet + ((slide.bullets.content[i] || {}).text || " "));
@@ -446,7 +446,7 @@ function renderTitleSlide(slide, svg=null, build=true) {
     for (let i = 0; i < slide.subtitle.content.length; i++) {
         subtitle.append("tspan")
                 .attr("x", "50%")
-                .attr("dy", slide.subtitle.size + 5)
+                .attr("dy", i > 0 ? slide.subtitle.size + 5 : 0)
                 .text(slide.subtitle.content[i]);
     }
     state.objects.push(subtitle);
@@ -520,7 +520,7 @@ function renderObjects(slide, transitioners, svg=null, build=true) {
                     for (let i = 0; i < object.text.length; i++) {
                         const tspan = obj.append("tspan")
                            .attr("x", object.attrs.x)
-                           .attr("dy", parseInt(object.attrs["font-size"]) + 5);
+                           .attr("dy", i > 0 ? parseInt(object.attrs["font-size"]) + 5 : 0);
                         if (object.html === true)
                             tspan.html(object.text[i]);
                         else
