@@ -91,7 +91,6 @@ function setupControlPanel() {
             slide_container.append("svg")
                            .attr("data-slide", i)
                            .attr("viewBox", `0 0 ${data.size.width} ${data.size.height}`)
-                           .style("background-color", "white") // TODO: remove
                            .attr("width", 300)
                            .attr("height", 300 / (data.size.width / data.size.height))
                            .style("margin", 10);
@@ -102,7 +101,7 @@ function setupControlPanel() {
                            .style("color", "white")
                            .style("text-align", "center")
                            .style("margin-bottom", "10px")
-                           .text(i)
+                           .text(i.toString() + (data.slides[i].id  ? " [" + data.slides[i].id + "]" : ""))
         control_state.slides[i] = {
             container: slide_container,
             svg: svg
