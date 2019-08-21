@@ -30,6 +30,10 @@ const KEYS = {
 
 // Set up presentation
 document.addEventListener('DOMContentLoaded', () => {
+    state.dimensions.width = data.size.width;
+    state.dimensions.height = data.size.height;
+    state.aspectRatio = data.size.width / data.size.height;
+
     if (window.location.search === "?control") {
         setupControlPanel();
         window.addEventListener("message", controlPanelMessageReceived);
@@ -47,10 +51,6 @@ function setupMainPresentation() {
     const body = document.querySelector("body")
     body.style.margin = 0;
     body.style.backgroundColor = "black";
-
-    state.dimensions.width = data.size.width;
-    state.dimensions.height = data.size.height;
-    state.aspectRatio = data.size.width / data.size.height;
 
     const padding = 1 + (window.innerHeight - (window.innerWidth / state.aspectRatio)) / 2;
     state.svg = d3.select("body")
