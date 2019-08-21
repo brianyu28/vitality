@@ -52,15 +52,11 @@ function setupMainPresentation() {
     body.style.margin = 0;
     body.style.backgroundColor = "black";
 
-    const padding = 1 + (window.innerHeight - (window.innerWidth / state.aspectRatio)) / 2;
     state.svg = d3.select("body")
                   .append("svg")
-                  .attr("width", window.innerWidth)
-                  .attr("height", window.innerWidth / state.aspectRatio)
                   .attr("viewBox", `0 0 ${data.size.width} ${data.size.height}`)
-                  .style("margin-top", padding)
-                  .style("margin-bottom", padding)
                   .style("background-color", "black");
+    mainWindowResize();
 
     renderSlide(0, 0, transition=false);
     state.cursorTimeout = setTimeout(hideCursor, 1000);
@@ -118,11 +114,27 @@ function setupControlPanel() {
 
 // Window resizes, resize SVG to fit
 function mainWindowResize() {
-    const padding = 1 + (window.innerHeight - (window.innerWidth / state.aspectRatio)) / 2;
-    state.svg.attr("width", window.innerWidth)
-             .attr("height", window.innerWidth / state.aspectRatio)
-             .style("margin-top", padding)
-             .style("margin-bottom", padding);
+    let width;
+    let height;
+    let vpadding;
+    let hpadding;
+    if (window.innerWidth / state.aspectRatio <= window.innerHeight) {
+        width = window.innerWidth;
+        height = window.innerWidth / state.aspectRatio;
+        vpadding = 1 + (window.innerHeight - height) / 2;
+        hpadding = 0;
+    } else {
+        width = window.innerHeight * state.aspectRatio;
+        height = window.innerHeight;
+        vpadding = 0;
+        hpadding = 1 + (window.innerWidth - width) / 2;
+    }
+    state.svg.attr("width", width)
+             .attr("height", height)
+             .style("margin-top", vpadding)
+             .style("margin-bottom", vpadding)
+             .style("margin-right", hpadding)
+             .style("margin-left", hpadding);
 }
 
 function mainKeyDownListener(e) {
