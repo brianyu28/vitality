@@ -307,7 +307,7 @@ def add_objects(result, objects, data, copy_objects=False):
             if "text" not in obj:
                 obj["text"] = []
             elif not isinstance(obj["text"], list):
-                obj["text"] = obj["text"].split("\n")
+                obj["text"] = str(obj["text"]).split("\n")
             obj["text"] = [str(item) for item in obj["text"]]
 
 
