@@ -333,7 +333,8 @@ def add_objects(result, objects, data, copy_objects=False):
                 "style": {
                     "fill": obj.get("style", {}).get("color", data["defaults"]["color"])
                 },
-                "text": obj["text"]
+                "text": obj["text"],
+                "html": obj.get("html", False)
             }
 
         # Image objects

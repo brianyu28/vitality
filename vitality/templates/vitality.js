@@ -518,10 +518,13 @@ function renderObjects(slide, transitioners, svg=null, build=true) {
                 }
                 if (object.text !== undefined) {
                     for (let i = 0; i < object.text.length; i++) {
-                        obj.append("tspan")
+                        const tspan = obj.append("tspan")
                            .attr("x", object.attrs.x)
-                           .attr("dy", parseInt(object.attrs["font-size"]) + 5)
-                           .text(object.text[i]);
+                           .attr("dy", parseInt(object.attrs["font-size"]) + 5);
+                        if (object.html === true)
+                            tspan.html(object.text[i]);
+                        else
+                            tspan.text(object.text[i]);
                     }
                 }
             }
