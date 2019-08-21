@@ -22,12 +22,24 @@ const KEYS = {
     leftArrow: 37,
     rightArrow: 39,
     b: 66,
+    c: 67,
     g: 71,
     z: 90
 }
 
 // Set up presentation
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.search === "?control") {
+        setupControlPanel();
+    } else {
+        setupMainPresentation();
+        window.addEventListener("keydown", mainKeyDownListener);
+        window.addEventListener("resize", mainWindowResize);
+        window.addEventListener("mousemove", mainWindowMouseMove);
+    }
+});
+
+function setupMainPresentation() {
     const body = document.querySelector("body")
     body.style.margin = 0;
     body.style.backgroundColor = "black";
@@ -46,20 +58,24 @@ document.addEventListener('DOMContentLoaded', () => {
                   .style("margin-bottom", padding)
                   .style("background-color", "black");
 
-    renderSlide(0, 0);
+    renderSlide(0, 0, transition=false);
     state.cursorTimeout = setTimeout(hideCursor, 1000);
-});
+}
+
+function setupControlPanel() {
+    console.log("set up the control panel here...");
+}
 
 // Window resizes, resize SVG to fit
-window.addEventListener("resize", () => {
+function mainWindowResize() {
     const padding = 1 + (window.innerHeight - (window.innerWidth / state.aspectRatio)) / 2;
     state.svg.attr("width", window.innerWidth)
              .attr("height", window.innerWidth / state.aspectRatio)
              .style("margin-top", padding)
              .style("margin-bottom", padding);
-});
+}
 
-window.addEventListener("keydown", (e) => {
+function mainKeyDownListener(e) {
     if (state.go !== false) {
         switch (e.keyCode) {
             case KEYS.esc:
@@ -71,11 +87,11 @@ window.addEventListener("keydown", (e) => {
                     const slideIndex = data.slide_ids[state.go];
                     if (slideIndex !== undefined) {
                         state.prev = {slideIdx: state.slideIdx, buildIdx: state.buildIdx};
-                        renderSlide(slideIndex, 0);
+                        renderSlide(slideIndex, 0, transition=false);
                     }
                 } else if (slideNo >= 0 && slideNo <= data.slides.length - 1) {
                     state.prev = {slideIdx: state.slideIdx, buildIdx: state.buildIdx};
-                    renderSlide(slideNo, 0);
+                    renderSlide(slideNo, 0, transition=false);
                 }
                 state.go = false;
                 break;
@@ -98,28 +114,30 @@ window.addEventListener("keydown", (e) => {
             break;
         case KEYS.b: // go back to prev
             if (state.prev !== null) {
-                renderSlide(state.prev.slideIdx, state.prev.buildIdx);
+                renderSlide(state.prev.slideIdx, state.prev.buildIdx, transition=false);
                 state.prev = null;
             }
             break;
+        case KEYS.c: // open control panel
+            window.open(location.origin + location.pathname + "?control", "", "top=50,left=50,width=800,height=600");
         case KEYS.g: // go to slide
             e.preventDefault();
             state.go = "";
             break;
         case KEYS.z:
             e.preventDefault();
-            renderSlide(0, 0);
+            renderSlide(0, 0, transition=false);
             break;
         default:
             break;
     }
-});
+}
 
-window.addEventListener("mousemove", () => {
+function mainWindowMouseMove() {
     clearTimeout(state.cursorTimeout);
     document.body.style.cursor = "";
     state.cursorTimeout = setTimeout(hideCursor, 1000);
-});
+}
 
 function hideCursor() {
     document.body.style.cursor = "none";
@@ -139,7 +157,7 @@ function renderNext() {
 
 function renderPrevious() {
     if (state.buildIdx === 0) {
-        renderSlide(Math.max(state.slideIdx - 1, 0), 0);
+        renderSlide(Math.max(state.slideIdx - 1, 0), 0, transition=false);
     } else {
         // Render previous build
         state.buildIdx -= 1;
@@ -149,7 +167,7 @@ function renderPrevious() {
     }
 }
 
-function renderSlide(slideIdx, buildIdx, transition=false) {
+function renderSlide(slideIdx, buildIdx, transition) {
 
     // Update slide index
     state.slideIdx = slideIdx;
