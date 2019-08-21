@@ -315,7 +315,7 @@ def add_objects(result, objects, data, copy_objects=False):
             if obj.get("hcenter") == True or obj.get("center") == True:
                 obj["attrs"]["x"] = "50%"
                 obj["attrs"]["text_anchor"] = "middle"
-            font_size = int(obj.get("font_size", data["defaults"]["text_font_size"]))
+            font_size = int(obj.get("size", data["defaults"]["text_font_size"]))
             if obj.get("vcenter") == True or obj.get("center") == True:
                 obj["attrs"]["y"] = (data["size"]["height"] / 2) - ((len(obj["text"]) * (font_size + 5)) / 2)
                 obj["attrs"]["dominant_baseline"] = "middle"
