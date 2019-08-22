@@ -251,103 +251,7 @@ def title_slide(slide, data):
 
 def add_objects(result, objects, data, copy_objects=False):
     for obj in objects:
-
-        # If there's a matching object in previous slide, carry over properties
-        if "id" in obj and len(data["slides"]) > 0:
-
-            # Look for matching object on previous slide
-            for prev_obj in data["slides"][-1].get("objects", []):
-                if prev_obj.get("id") == obj["id"]:
-
-                    # Copy old properties, remove "build" property
-                    temp_obj = copy.copy(prev_obj)
-                    if "build" in temp_obj:
-                        del temp_obj["build"]
-
-                    # Update attrs and style fields
-                    for prop in ["attrs", "style"]:
-                        if prop in temp_obj:
-                            temp_obj[prop] = copy.copy(temp_obj[prop])
-                        for key in obj.get(prop, {}):
-                            temp_obj[prop][key] = obj[prop][key]
-
-                    # Update other fields on the object
-                    for prop in ["id", "type", "transition_length"]:
-                        if prop in obj:
-                            temp_obj[prop] = obj[prop]
-                    obj = temp_obj
-
-        if "transition_length" not in obj:
-            obj["transition_length"] = data["defaults"]["transition_length"]
-
-        if obj.get("type") == "html":
-            obj = {
-                "type": "html",
-                "attrs": {
-                    "x": obj.get("attrs", {}).get("x", 0),
-                    "y": obj.get("attrs", {}).get("y", 0),
-                    "height": obj.get("attrs", {}).get("height", "100%"),
-                    "width": obj.get("attrs", {}).get("width", "100%")
-                },
-                "style": {
-                    "fill": obj.get("style", {}).get("fill", data["defaults"]["background_color"]),
-                    "zoom": obj.get("style", {}).get("zoom", data["defaults"]["html_zoom"])
-                },
-                "content": obj.get("html", "")
-            }
-
-        # Text objects
-        elif obj.get("type") == "text":
-
-            # Handle missing attributes on object
-            if "attrs" not in obj:
-                obj["attrs"] = {}
-            if "style" not in obj:
-                obj["style"] = {}
-            if "text" not in obj:
-                obj["text"] = []
-            elif not isinstance(obj["text"], list):
-                obj["text"] = str(obj["text"]).split("\n")
-            obj["text"] = [str(item) for item in obj["text"]]
-
-
-            # Auto-horizontally or vertically center
-            if obj.get("hcenter") == True or obj.get("center") == True:
-                obj["attrs"]["x"] = "50%"
-                obj["attrs"]["text_anchor"] = "middle"
-            font_size = int(obj.get("size", data["defaults"]["text_font_size"]))
-            if obj.get("vcenter") == True or obj.get("center") == True:
-                obj["attrs"]["y"] = (data["size"]["height"] / 2) - (((len(obj["text"]) - 1) * (font_size + 5)) / 2)
-                obj["attrs"]["dominant_baseline"] = "middle"
-            obj = {
-                "type": "text",
-                "attrs": {
-                    "x": obj.get("attrs", {}).get("x", data["defaults"]["text_x"]),
-                    "y": obj.get("attrs", {}).get("y", data["defaults"]["text_y"]),
-                    "dominant-baseline": obj.get("attrs", {}).get("dominant_baseline", data["defaults"]["text_baseline"]),
-                    "text-anchor": obj.get("attrs", {}).get("text_anchor", data["defaults"]["text_anchor"]),
-                    "font-size": font_size,
-                    "font-family": obj.get("font", data["defaults"]["font"]),
-                    "xml:space": "preserve"
-                },
-                "style": {
-                    "fill": obj.get("style", {}).get("color", data["defaults"]["color"])
-                },
-                "text": obj["text"],
-                "html": obj.get("html", False),
-                "build": obj.get("build")
-            }
-            if obj["build"] is None:
-                del obj["build"]
-
-        # Image objects
-        elif obj.get("type") == "image":
-            if "attrs" not in obj:
-                obj["attrs"] = {}
-            if "href" in obj and "xlink:href" not in obj.get("attrs", {}):
-                obj["attrs"]["xlink:href"] = obj["href"]
-
-        result["objects"].append(obj)
+        result["objects"].append(get_object_result(obj, data))
 
     # Copy objects
     copied = []
@@ -355,5 +259,114 @@ def add_objects(result, objects, data, copy_objects=False):
         this_ids = {obj["id"] for obj in result["objects"] if obj.get("id") is not None}
         for obj in data["slides"][-1].get("objects", []):
             if obj.get("id") is not None and obj["id"] not in this_ids:
-                copied.append(copy.copy(obj))
+                    copied.append(copy.copy(obj))
     result["objects"] = copied + result["objects"]
+
+
+def get_object_result(obj, data):
+    # If there's a matching object in previous slide, carry over properties
+    if "id" in obj and len(data["slides"]) > 0:
+
+        # Look for matching object on previous slide
+        for prev_obj in data["slides"][-1].get("objects", []):
+            if prev_obj.get("id") == obj["id"]:
+
+                # Copy old properties, remove "build" property
+                temp_obj = copy.copy(prev_obj)
+                if "build" in temp_obj:
+                    del temp_obj["build"]
+
+                # Update attrs and style fields
+                for prop in ["attrs", "style"]:
+                    if prop in temp_obj:
+                        temp_obj[prop] = copy.copy(temp_obj[prop])
+                    for key in obj.get(prop, {}):
+                        temp_obj[prop][key] = obj[prop][key]
+
+                # Update other fields on the object
+                for prop in ["id", "type", "transition_length"]:
+                    if prop in obj:
+                        temp_obj[prop] = obj[prop]
+                obj = temp_obj
+
+    if "transition_length" not in obj:
+        obj["transition_length"] = data["defaults"]["transition_length"]
+
+    if obj.get("type") == "html":
+        obj = {
+            "type": "html",
+            "attrs": {
+                "x": obj.get("attrs", {}).get("x", 0),
+                "y": obj.get("attrs", {}).get("y", 0),
+                "height": obj.get("attrs", {}).get("height", "100%"),
+                "width": obj.get("attrs", {}).get("width", "100%")
+            },
+            "style": {
+                "fill": obj.get("style", {}).get("fill", data["defaults"]["background_color"]),
+                "zoom": obj.get("style", {}).get("zoom", data["defaults"]["html_zoom"])
+            },
+            "content": obj.get("html", "")
+        }
+
+    # Text objects
+    elif obj.get("type") == "text":
+
+        # Handle missing attributes on object
+        if "attrs" not in obj:
+            obj["attrs"] = {}
+        if "style" not in obj:
+            obj["style"] = {}
+        if "text" not in obj:
+            obj["text"] = []
+        elif not isinstance(obj["text"], list):
+            obj["text"] = str(obj["text"]).split("\n")
+        obj["text"] = [str(item) for item in obj["text"]]
+
+
+        # Auto-horizontally or vertically center
+        if obj.get("hcenter") == True or obj.get("center") == True:
+            obj["attrs"]["x"] = "50%"
+            obj["attrs"]["text_anchor"] = "middle"
+        font_size = int(obj.get("size", data["defaults"]["text_font_size"]))
+        if obj.get("vcenter") == True or obj.get("center") == True:
+            obj["attrs"]["y"] = (data["size"]["height"] / 2) - (((len(obj["text"]) - 1) * (font_size + 5)) / 2)
+            obj["attrs"]["dominant_baseline"] = "middle"
+        obj = {
+            "type": "text",
+            "attrs": {
+                "x": obj.get("attrs", {}).get("x", data["defaults"]["text_x"]),
+                "y": obj.get("attrs", {}).get("y", data["defaults"]["text_y"]),
+                "dominant-baseline": obj.get("attrs", {}).get("dominant_baseline", data["defaults"]["text_baseline"]),
+                "text-anchor": obj.get("attrs", {}).get("text_anchor", data["defaults"]["text_anchor"]),
+                "font-size": font_size,
+                "font-family": obj.get("font", data["defaults"]["font"]),
+                "xml:space": "preserve"
+            },
+            "style": {
+                "fill": obj.get("style", {}).get("color", data["defaults"]["color"])
+            },
+            "text": obj["text"],
+            "html": obj.get("html", False),
+            "build": obj.get("build")
+        }
+        if obj["build"] is None:
+            del obj["build"]
+
+    # Image objects
+    elif obj.get("type") == "image":
+        if "attrs" not in obj:
+            obj["attrs"] = {}
+        if "href" in obj and "xlink:href" not in obj.get("attrs", {}):
+            obj["attrs"]["xlink:href"] = obj["href"]
+
+    # Group objects
+    elif obj.get("type") == "group":
+        x = obj.get("attrs", {}).get("x", 0)
+        y = obj.get("attrs", {}).get("y", 0)
+        obj["attrs"]["transform"] = f"translate({x}, {y})"
+        obj["children"] = []
+        for child in obj["objects"]:
+            obj["children"].append(get_object_result(child, data))
+
+    return obj
+

@@ -303,7 +303,8 @@ function renderSlide(slideIdx, buildIdx, transition) {
     // Remove previous content
     for (let i = 0; i < state.objects.length; i++) {
         if (transition === false ||
-            Object.values(transitioners).some((k) => k.object == state.objects[i]) === false) {
+            Object.values(transitioners).some((k) =>
+                (k.object == state.objects[i])) === false) {
             state.objects[i].remove();
             delete state.objects[i];
         }
@@ -468,6 +469,7 @@ function renderTitleSlide(slide, svg=null, build=true) {
 }
 
 function transitionCall(transition, attrs, style) {
+
     for (let key in attrs)
         transition.attr(key, attrs[key]);
     for (let key in style)
@@ -475,6 +477,7 @@ function transitionCall(transition, attrs, style) {
 }
 
 function renderObjects(slide, transitioners, svg=null, build=true) {
+
     state.references = {};
     for (let i = 0; i < slide.objects.length; i++) {
         const object = slide.objects[i];
@@ -499,71 +502,84 @@ function renderObjects(slide, transitioners, svg=null, build=true) {
                 transition_length: object.transition_length
             };
         } else {
-
-            let obj = null;
-
-            if (object.type === "html") {
-
-                // Create HTML object
-                obj =
-                    (svg || state.svg).append("foreignObject")
-                             .attr("x", object.attrs.x)
-                             .attr("y", object.attrs.y)
-                             .attr("height", object.attrs.height)
-                             .attr("width", object.attrs.width);
-                obj.append("xhtml:div")
-                   .attr("xmlns", "http://www.w3.org/2000/svg")
-                   .style("background-color", object.style.fill)
-                   .style("zoom", object.style.zoom)
-                   .style("margin", 0)
-                   .style("position", "absolute")
-                   .style("height", "100%")
-                   .style("width", "100%")
-                   .html(object.content || "");
-
-            } else {
-
-                // Create non-HTML object
-                obj = (svg || state.svg).append(object.type);
-                for (let key in object.attrs) {
-                    obj.attr(key, object.attrs[key]);
-                }
-                for (let key in object.style) {
-                    obj.style(key, object.style[key]);
-                }
-                if (object.text !== undefined) {
-                    for (let i = 0; i < object.text.length; i++) {
-                        const tspan = obj.append("tspan")
-                           .attr("x", object.attrs.x)
-                           .attr("dy", i > 0 ? parseInt(object.attrs["font-size"]) + 5 : 0);
-                        if (object.html === true)
-                            tspan.html(object.text[i]);
-                        else
-                            tspan.text(object.text[i]);
-                    }
-                }
-            }
-
-            // Check if object should be built later
-            if (build && object.build) {
-                obj.attr("display", "none");
-                if (object.build === true) {
-                    state.builds.push([obj]);
-                } else if (state.builds[object.build] === undefined) {
-                    state.builds[object.build] = [obj];
-                } else {
-                    state.builds[object.build].push(obj);
-                }
-            }
-
-            // Record reference to object if identified
-            if (object.id !== undefined) {
-                state.references[object.id] = {
-                    object: obj,
-                    transition_length: object.transition_length
-                };
-            }
-            state.objects.push(obj);
+            renderObject(object, (svg || state.svg), build, true);
         }
+    }
+}
+
+function renderObject(object, parent_object, build, add_to_references) {
+    let obj = null;
+
+    if (object.type == "group") {
+        obj = parent_object.append("g")
+                           .attr("transform", object.attrs.transform);
+        for (let i = 0; i < object.children.length; i++) {
+            renderObject(object.children[i], obj, build, false);
+        }
+    }
+    else if (object.type === "html") {
+
+        // Create HTML object
+        obj =
+            parent_object.append("foreignObject")
+                         .attr("x", object.attrs.x)
+                         .attr("y", object.attrs.y)
+                         .attr("height", object.attrs.height)
+                         .attr("width", object.attrs.width);
+        obj.append("xhtml:div")
+           .attr("xmlns", "http://www.w3.org/2000/svg")
+           .style("background-color", object.style.fill)
+           .style("zoom", object.style.zoom)
+           .style("margin", 0)
+           .style("position", "absolute")
+           .style("height", "100%")
+           .style("width", "100%")
+           .html(object.content || "");
+
+    } else {
+
+        // Create non-HTML object
+        obj = parent_object.append(object.type);
+        for (let key in object.attrs) {
+            obj.attr(key, object.attrs[key]);
+        }
+        for (let key in object.style) {
+            obj.style(key, object.style[key]);
+        }
+        if (object.text !== undefined) {
+            for (let i = 0; i < object.text.length; i++) {
+                const tspan = obj.append("tspan")
+                   .attr("x", object.attrs.x)
+                   .attr("dy", i > 0 ? parseInt(object.attrs["font-size"]) + 5 : 0);
+                if (object.html === true)
+                    tspan.html(object.text[i]);
+                else
+                    tspan.text(object.text[i]);
+            }
+        }
+    }
+
+    // Check if object should be built later
+    if (build && object.build) {
+        obj.attr("display", "none");
+        if (object.build === true) {
+            state.builds.push([obj]);
+        } else if (state.builds[object.build] === undefined) {
+            state.builds[object.build] = [obj];
+        } else {
+            state.builds[object.build].push(obj);
+        }
+    }
+
+    // Add top-level objects to references and objects, but not members of groups
+    if (add_to_references) {
+        // Record reference to object if identified
+        if (object.id !== undefined) {
+            state.references[object.id] = {
+                object: obj,
+                transition_length: object.transition_length
+            };
+        }
+        state.objects.push(obj);
     }
 }
