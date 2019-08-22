@@ -78,11 +78,15 @@ def presentation_data(config):
         elif slide.get("type") == "title" or all(prop in slide for prop in ["title", "subtitle"]):
             result = title_slide(slide, data)
 
-        elif slide.get("type") == "bullets":
+        elif slide.get("type") == "bullets" or "bullets" in slide:
             result = bullets_slide(slide, data)
 
         elif slide.get("type") == "html" or "html" in slide:
             result = html_slide(slide, data)
+
+        # If there's a title in the slide, treat as a bulleted slide with no bullets
+        elif "title" in slide:
+            result = bullets_slide(slide, data)
 
         else:
             result = blank_slide(slide, data)
