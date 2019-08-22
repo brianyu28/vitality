@@ -6,3 +6,11 @@
     transform: translate(-50%, -50%);
 }
 
+
+@media print {
+    .print {
+        margin: 0;
+        page-break-after: always;
+        width: 100%;
+    }
+}

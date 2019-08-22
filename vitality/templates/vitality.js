@@ -25,6 +25,7 @@ const KEYS = {
     b: 66,
     c: 67,
     g: 71,
+    p: 80,
     z: 90
 }
 
@@ -38,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setupControlPanel();
         window.addEventListener("message", controlPanelMessageReceived);
         window.addEventListener("keydown", controlPanelKeyDownListener);
+    } else if (window.location.search === "?print") {
+        setupPrintout();
     } else {
         setupMainPresentation();
         window.addEventListener("keydown", mainKeyDownListener);
@@ -110,6 +113,23 @@ function setupControlPanel() {
         renderSlidePreview(i, data.slides[i]);
     }
 
+}
+
+function setupPrintout() {
+    const body = d3.select("body").style("margin", 0);
+
+    for (let i = 0; i < data.slides.length; i++) {
+        const div = body.append("div").attr("class", "print");
+        const svg = div.append("svg")
+            .attr("viewBox", `0 0 ${data.size.width} ${data.size.height}`)
+            .attr("width", window.innerWidth)
+            .attr("height", window.innerWidth / (data.size.width / data.size.height));
+        control_state.slides[i] = {
+            container: div,
+            svg: svg
+        }
+        renderSlidePreview(i, data.slides[i]);
+    }
 }
 
 // Window resizes, resize SVG to fit
@@ -192,6 +212,9 @@ function mainKeyDownListener(e) {
         case KEYS.g: // go to slide
             e.preventDefault();
             state.go = "";
+            break;
+        case KEYS.p: // print
+            window.open(location.origin + location.pathname + "?print");
             break;
         case KEYS.z:
             e.preventDefault();
