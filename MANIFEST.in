@@ -1,0 +1,1 @@
+recursive-include vitality/templates/ *.html *.css *.js
