@@ -3,9 +3,6 @@ from setuptools import setup, find_packages
 with open("README.md") as f:
     readme = f.read()
 
-with open("LICENSE") as f:
-    license = f.read()
-
 setup(
     author="Brian Yu",
     author_email="brian@brianyu.me",
@@ -22,7 +19,7 @@ setup(
         "termcolor>=1.1",
         "watchdog>=0.9"
     ],
-    license=license,
+    license="GPL-3.0",
     long_description=readme,
     long_description_content_type="text/markdown",
     name="vitality",
@@ -30,4 +27,4 @@ setup(
     url="https://github.com/brianyu28/vitality",
     version="0.1.5"
 )
-
+license
