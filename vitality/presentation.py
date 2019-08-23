@@ -13,6 +13,7 @@ DEFAULTS = SimpleNamespace(
 
     # Spacing
     bullets_padding_left=100,
+    bullets_line_spacing=5,
     heading_padding_left=50,
     heading_padding_top=80,
 
@@ -21,6 +22,7 @@ DEFAULTS = SimpleNamespace(
     text_y=0,
     text_baseline="baseline",
     text_anchor="start",
+    text_object_spacing=5,
 
     # Layout
     background_color="black",
@@ -330,20 +332,22 @@ def get_object_result(obj, data):
         # Auto-horizontally or vertically center
         if obj.get("hcenter") == True or obj.get("center") == True:
             obj["attrs"]["x"] = "50%"
-            obj["attrs"]["text_anchor"] = "middle"
+            obj["attrs"]["text-anchor"] = "middle"
         font_size = int(obj.get("size", data["defaults"]["text_font_size"]))
         if obj.get("vcenter") == True or obj.get("center") == True:
             obj["attrs"]["y"] = (data["size"]["height"] / 2) - (((len(obj["text"]) - 1) * (font_size + 5)) / 2)
-            obj["attrs"]["dominant_baseline"] = "middle"
+            obj["attrs"]["dominant-baseline"] = "middle"
         obj = {
             "type": "text",
             "attrs": {
                 "x": obj.get("attrs", {}).get("x", data["defaults"]["text_x"]),
                 "y": obj.get("attrs", {}).get("y", data["defaults"]["text_y"]),
-                "dominant-baseline": obj.get("attrs", {}).get("dominant_baseline", data["defaults"]["text_baseline"]),
-                "text-anchor": obj.get("attrs", {}).get("text_anchor", data["defaults"]["text_anchor"]),
+                "dominant-baseline": obj.get("attrs", {}).get("dominant-baseline", data["defaults"]["text_baseline"]),
+                "text-anchor": obj.get("attrs", {}).get("text-anchor", data["defaults"]["text_anchor"]),
                 "font-size": font_size,
                 "font-family": obj.get("font", data["defaults"]["font"]),
+                "letter-spacing": obj.get("attrs", {}).get("letter-spacing", 0),
+                "spacing": obj.get("spacing", data["defaults"]["text_object_spacing"]),
                 "xml:space": "preserve"
             },
             "style": {

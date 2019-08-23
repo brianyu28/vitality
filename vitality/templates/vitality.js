@@ -26,6 +26,7 @@ const KEYS = {
     c: 67,
     g: 71,
     p: 80,
+    x: 88,
     z: 90
 }
 
@@ -215,6 +216,10 @@ function mainKeyDownListener(e) {
             break;
         case KEYS.p: // print
             window.open(location.origin + location.pathname + "?print");
+            break;
+        case KEYS.x:
+            e.preventDefault();
+            renderSlide(data.slides.length - 1, 0, transition=false);
             break;
         case KEYS.z:
             e.preventDefault();
@@ -415,7 +420,7 @@ function renderBulletsSlide(slide, svg=null, build=true) {
     for (let i = 0; i < slide.bullets.content.length; i++) {
         const bullet =
             bullets.append("tspan")
-                   .attr("x", slide.bullets.padding_left)
+                   .attr("x", slide.bullets.padding_left + ((slide.bullets.content[i] || {}).spacing || 0))
                    .attr("dy", i > 0 ? slide.bullets.size + slide.bullets.spacing : 0)
                    .attr("display", (build && slide.bullets.build) ? "none" : "")
                    .style("fill", (slide.bullets.content[i] || {}).color || slide.bullets.color)
@@ -573,7 +578,7 @@ function renderObject(object, parent_object, build, add_to_references) {
             for (let i = 0; i < object.text.length; i++) {
                 const tspan = obj.append("tspan")
                    .attr("x", object.attrs.x)
-                   .attr("dy", i > 0 ? parseInt(object.attrs["font-size"]) + 5 : 0);
+                   .attr("dy", i > 0 ? parseInt(object.attrs["font-size"]) + object.attrs.spacing : 0);
                 if (object.html === true)
                     tspan.html(object.text[i]);
                 else
