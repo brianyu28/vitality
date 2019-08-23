@@ -24,6 +24,7 @@ setup(
     ],
     license=license,
     long_description=readme,
+    long_description_content_type="text/markdown",
     name="vitality",
     packages=["vitality"],
     url="https://github.com/brianyu28/vitality",
