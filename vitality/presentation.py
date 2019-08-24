@@ -371,7 +371,7 @@ def get_object_result(obj, data):
     elif obj.get("type") == "group":
         x = obj.get("attrs", {}).get("x", 0)
         y = obj.get("attrs", {}).get("y", 0)
-        obj["attrs"]["transform"] = f"translate({x}, {y})"
+        obj["attrs"]["transform"] = "translate({}, {})".format(x, y)
         obj["children"] = []
         for child in obj["objects"]:
             obj["children"].append(get_object_result(child, data))

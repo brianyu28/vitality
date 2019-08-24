@@ -40,7 +40,7 @@ def main():
     parser.add_argument("-o", "--output", type=str, required=True, help="output file")
     parser.add_argument("-r", "--remote-d3", action="store_true", default=False, help="load d3.js remotely")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
-    parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument("-V", "--version", action="version", version="%(prog)s {}".format(__version__))
     parser.add_argument("-w", "--watch", action="store_true", help="watch file for changes")
     args = parser.parse_args()
 
@@ -78,7 +78,7 @@ def compile_presentation(filename, outfile, remote_d3=False):
     )
     with open(outfile, "w") as f:
         f.write(presentation)
-    termcolor.cprint(f"Presentation generated at {outfile}", color="green")
+    termcolor.cprint("Presentation generated at {}".format(outfile), color="green")
 
 
 class FileChangeHandler(FileSystemEventHandler):
