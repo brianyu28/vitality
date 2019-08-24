@@ -189,7 +189,11 @@ function mainKeyDownListener(e) {
         case KEYS.rightArrow:
         case KEYS.space:
             e.preventDefault();
-            renderNext();
+            if (e.shiftKey) {
+                renderPrevious();
+            } else {
+                renderNext();
+            }
             break;
         case KEYS.leftArrow:
             e.preventDefault();
